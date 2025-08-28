@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.buseiny.app.dto.HistoryDTO;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class StateService {
@@ -27,6 +29,8 @@ public class StateService {
 
     private final ObjectMapper mapper;
     private AppState state;
+    private static final DateTimeFormatter D = DateTimeFormatter.ISO_LOCAL_DATE;
+
 
     public StateService(){
         mapper = new ObjectMapper();
@@ -346,4 +350,336 @@ public class StateService {
         }
         save();
     }
+
+    private Map<String, List<HistoryDTO.Item>> buildStreakBonusesFixed() {
+        Map<String, List<HistoryDTO.Item>> map = new HashMap<>();
+        var daily = state.getAnna().getDaily();
+
+        // Соберём все даты и отсортируем
+        List<LocalDate> dates = daily.keySet().stream()
+                .map(LocalDate::parse)
+                .sorted()
+                .toList();
+
+        // SPORT
+        int streak = 0;
+        for (LocalDate d : dates) {
+            var log = daily.get(d.toString());
+            boolean done = log != null && log.isSportAwarded();
+            if (done) {
+                streak++;
+                if (streak % 7 == 0) {
+                    map.computeIfAbsent(d.toString(), k->new ArrayList<>())
+                            .add(new HistoryDTO.Item("Стрик: Спорт (7 дней)", 7));
+                }
+            } else streak = 0;
+        }
+        // ENGLISH
+        streak = 0;
+        for (LocalDate d : dates) {
+            var log = daily.get(d.toString());
+            boolean done = log != null && log.isEnglishDailyAwarded();
+            if (done) {
+                streak++;
+                if (streak % 7 == 0) {
+                    map.computeIfAbsent(d.toString(), k->new ArrayList<>())
+                            .add(new HistoryDTO.Item("Стрик: Английский (7 дней)", 7));
+                }
+            } else streak = 0;
+        }
+        // VIET WORDS
+        streak = 0;
+        for (LocalDate d : dates) {
+            var log = daily.get(d.toString());
+            boolean done = log != null && log.isVietWordsAwarded();
+            if (done) {
+                streak++;
+                if (streak % 7 == 0) {
+                    map.computeIfAbsent(d.toString(), k->new ArrayList<>())
+                            .add(new HistoryDTO.Item("Стрик: 5 вьет. слов (7 дней)", 7));
+                }
+            } else streak = 0;
+        }
+        return map;
+    }
+
+    // Стрики и очки для админских generic задач (по каждой задаче свой стрик)
+    private Map<String, List<HistoryDTO.Item>> buildGenericDailyItemsAndBonuses() {
+        Map<String, List<HistoryDTO.Item>> map = new HashMap<>();
+
+        // соберём все даты (для которых есть отметки generic задач)
+        Set<LocalDate> dateSet = new HashSet<>();
+        for (var e : state.getAnna().getGenericDoneByDay().entrySet()) {
+            dateSet.add(LocalDate.parse(e.getKey()));
+        }
+        List<LocalDate> dates = dateSet.stream().sorted().toList();
+
+        // Для каждой задачи считаем стрик по дням
+        for (var def : state.getGenericDaily()) {
+            int streak = 0;
+            for (LocalDate d : dates) {
+                var set = state.getAnna().getGenericDoneByDay().getOrDefault(d.toString(), Collections.emptySet());
+                boolean done = set.contains(def.getId());
+                if (done) {
+                    // ежедневная награда
+                    map.computeIfAbsent(d.toString(), k->new ArrayList<>())
+                            .add(new HistoryDTO.Item("Ежедневно: " + def.getTitle(), def.getDailyReward()));
+                    // стрик
+                    if (def.isStreakEnabled()) {
+                        streak++;
+                        if (streak % 7 == 0) {
+                            map.computeIfAbsent(d.toString(), k->new ArrayList<>())
+                                    .add(new HistoryDTO.Item("Стрик: " + def.getTitle() + " (7 дней)", 7));
+                        }
+                    }
+                } else {
+                    if (def.isStreakEnabled()) streak = 0;
+                }
+            }
+        }
+        return map;
+    }
+
+    public synchronized HistoryDTO.DayHistory computeDayHistory(String dateStr) throws IOException {
+        processWeekIfNeeded(); // на всякий случай
+
+        LocalDate date = LocalDate.parse(dateStr);
+        var u = state.getAnna();
+        var daily = u.getDaily().get(dateStr);
+
+        List<HistoryDTO.Item> items = new ArrayList<>();
+
+        // Фиксированные ежедневные
+        if (daily != null) {
+            if (daily.isNutritionDailyAwarded()) items.add(new HistoryDTO.Item("Нутрициология 3 часа/день", 2));
+            if (daily.isEnglishDailyAwarded())   items.add(new HistoryDTO.Item("Английский 1 час", 1));
+            if (daily.isSportAwarded())          items.add(new HistoryDTO.Item("Спорт", 1));
+            if (daily.isYogaAwarded())           items.add(new HistoryDTO.Item("Йога", 1));
+            if (daily.isVietWordsAwarded())      items.add(new HistoryDTO.Item("5 вьетнамских слов", 1));
+        }
+
+        // Стриковые бонусы фиксированных задач
+        var fixedBonuses = buildStreakBonusesFixed().getOrDefault(dateStr, List.of());
+        items.addAll(fixedBonuses);
+
+        // Generic daily + их стрики
+        var genericMap = buildGenericDailyItemsAndBonuses();
+        items.addAll(genericMap.getOrDefault(dateStr, List.of()));
+
+        // Разовые цели (если завершены в этот день)
+        for (var g : state.getGoals()) {
+            if (g.getCompletedAt() != null && g.getCompletedAt().toLocalDate().equals(date)) {
+                items.add(new HistoryDTO.Item("Достижение: " + g.getTitle(), g.getReward()));
+            }
+        }
+
+        // (Опционально можно добавить недельный бонус/штраф, если хочешь — скажи, запишем транзакции и отрисуем здесь.)
+
+        int total = items.stream().mapToInt(it -> it.points).sum();
+
+        HistoryDTO.DayHistory dh = new HistoryDTO.DayHistory();
+        dh.date = dateStr;
+        dh.total = total;
+        dh.items = items;
+        return dh;
+    }
+
+    public synchronized HistoryDTO.MonthHistory computeMonthHistory(int year, int month) throws IOException {
+        processWeekIfNeeded();
+
+        LocalDate first = LocalDate.of(year, month, 1);
+        LocalDate last = first.plusMonths(1).minusDays(1);
+
+        List<HistoryDTO.DayHistory> list = new ArrayList<>();
+        for (LocalDate d = first; !d.isAfter(last); d = d.plusDays(1)) {
+            list.add(computeDayHistory(d.format(D)));
+        }
+
+        HistoryDTO.MonthHistory mh = new HistoryDTO.MonthHistory();
+        mh.year = year;
+        mh.month = month;
+        mh.days = list;
+        return mh;
+    }
+
+    // ===== Админ: баланс
+    public synchronized int adminAddBalance(int delta) throws IOException {
+        var u = state.getAnna();
+        u.setBalance(Math.max(0, u.getBalance() + delta));
+        save();
+        return u.getBalance();
+    }
+    public synchronized int adminSetBalance(int value) throws IOException {
+        var u = state.getAnna();
+        u.setBalance(Math.max(0, value));
+        save();
+        return u.getBalance();
+    }
+
+    // ===== Админ: правка дня + пересчет
+    public static class UpsertResult {
+        public com.buseiny.app.dto.HistoryDTO.DayHistory day;
+        public int newBalance;
+    }
+
+    public synchronized UpsertResult adminUpsertDayAndRecalc(com.buseiny.app.dto.AdminDayEditRequest req) throws IOException {
+        if (req.date == null || req.date.isBlank()) throw new IllegalArgumentException("date required");
+        var u = state.getAnna();
+
+        // 1) правим DailyLog по дате
+        var log = u.getDaily().computeIfAbsent(req.date, k -> new com.buseiny.app.model.DailyLog());
+        if (req.nutritionMinutes != null) {
+            log.setNutritionMinutes(Math.max(0, req.nutritionMinutes));
+            log.setNutritionDailyAwarded(log.getNutritionMinutes() >= 180);
+        }
+        if (req.englishMinutes != null) {
+            log.setEnglishMinutes(Math.max(0, req.englishMinutes));
+            log.setEnglishDailyAwarded(log.getEnglishMinutes() >= 60);
+        }
+        if (req.sportDone != null)  log.setSportAwarded(req.sportDone);
+        if (req.yogaDone != null)   log.setYogaAwarded(req.yogaDone);
+        if (req.vietDone != null)   log.setVietWordsAwarded(req.vietDone);
+
+        if (req.genericDoneIds != null) {
+            // Полная замена набора выполненных generic-задач на дату
+            u.getGenericDoneByDay().put(req.date, new java.util.HashSet<>(req.genericDoneIds));
+        }
+
+        save();
+
+        // 2) тотальный пересчет баланса и стриков по всем дням
+        recalcEverythingFromScratch();
+
+        // 3) ответ
+        UpsertResult out = new UpsertResult();
+        out.day = computeDayHistory(req.date);
+        out.newBalance = state.getAnna().getBalance();
+        return out;
+    }
+
+    /**
+     * Полный пересчет:
+     * - Сбрасываем баланс, стрики и genericStreaks
+     * - Проходим все даты по порядку:
+     *    - считаем дневные очки (минутные и чекбоксы)
+     *    - добавляем бонусы стриков по правилам (каждые 7 подряд +7)
+     * - Добавляем разовые цели в день их выполнения
+     * - Применяем недельный +14/-20 для каждой завершенной недели (после первой полной)
+     * - Вычитаем покупки в день покупки
+     * - Баланс не уходит ниже 0 (как в addBalance)
+     */
+    private void recalcEverythingFromScratch() throws IOException {
+        var u = state.getAnna();
+        // Сбрасываем
+        u.setBalance(0);
+        u.setSportStreak(0);
+        u.setEnglishStreak(0);
+        u.setVietWordsStreak(0);
+        u.getGenericStreaks().clear();
+
+        // Соберём все даты, где есть хоть что-то
+        java.util.TreeSet<java.time.LocalDate> dates = new java.util.TreeSet<>();
+        for (var k : u.getDaily().keySet()) dates.add(java.time.LocalDate.parse(k));
+        for (var k : u.getGenericDoneByDay().keySet()) dates.add(java.time.LocalDate.parse(k));
+        for (var g : state.getGoals()) {
+            if (g.getCompletedAt() != null) dates.add(g.getCompletedAt().toLocalDate());
+        }
+        for (var p : u.getPurchases()) {
+            if (p.getPurchasedAt() != null) dates.add(p.getPurchasedAt().toLocalDate());
+        }
+        if (dates.isEmpty()) { save(); return; }
+
+        // Порог для недельного расчета
+        java.time.LocalDate firstFullWeekStart = firstFullWeekStart();
+        java.time.LocalDate minDate = dates.first();
+        java.time.LocalDate maxDate = java.time.LocalDate.now(zone()); // до сегодня
+
+        // Идём по дням
+        java.time.LocalDate d = minDate;
+        int sportStreak = 0, engStreak = 0, vietStreak = 0;
+        java.util.Map<String,Integer> genericStreaks = new java.util.HashMap<>();
+
+        while (!d.isAfter(maxDate)) {
+            String key = d.toString();
+            var log = u.getDaily().get(key);
+
+            // Дневные награды
+            if (log != null) {
+                if (log.isNutritionDailyAwarded()) addBalance(2);
+                if (log.isEnglishDailyAwarded())   addBalance(1);
+                if (log.isSportAwarded())          addBalance(1);
+                if (log.isYogaAwarded())           addBalance(1);
+                if (log.isVietWordsAwarded())      addBalance(1);
+            }
+
+            // Бонусы стриков для фиксированных задач
+            boolean sportDone = log != null && log.isSportAwarded();
+            if (sportDone) {
+                sportStreak++;
+                if (sportStreak % 7 == 0) addBalance(7);
+            } else sportStreak = 0;
+
+            boolean engDone = log != null && log.isEnglishDailyAwarded();
+            if (engDone) {
+                engStreak++;
+                if (engStreak % 7 == 0) addBalance(7);
+            } else engStreak = 0;
+
+            boolean vietDone = log != null && log.isVietWordsAwarded();
+            if (vietDone) {
+                vietStreak++;
+                if (vietStreak % 7 == 0) addBalance(7);
+            } else vietStreak = 0;
+
+            // Generic daily + стрики
+            var doneSet = u.getGenericDoneByDay().getOrDefault(key, java.util.Collections.emptySet());
+            if (!doneSet.isEmpty()) {
+                for (var def : state.getGenericDaily()) {
+                    if (doneSet.contains(def.getId())) {
+                        addBalance(def.getDailyReward());
+                        if (def.isStreakEnabled()) {
+                            int s = genericStreaks.getOrDefault(def.getId(), 0) + 1;
+                            genericStreaks.put(def.getId(), s);
+                            if (s % 7 == 0) addBalance(7);
+                        }
+                    }
+                }
+            }
+
+            // Разовые цели этим днём
+            for (var g : state.getGoals()) {
+                if (g.getCompletedAt() != null && g.getCompletedAt().toLocalDate().equals(d)) {
+                    addBalance(g.getReward());
+                }
+            }
+
+            // Покупки этим днём
+            for (var p : u.getPurchases()) {
+                if (p.getPurchasedAt() != null && p.getPurchasedAt().toLocalDate().equals(d)) {
+                    u.setBalance(Math.max(0, u.getBalance() - p.getCostSnapshot()));
+                }
+            }
+
+            // Применяем недельный +14/-20 по завершению недели (в понедельник новой недели)
+            var nextDay = d.plusDays(1);
+            if (nextDay.getDayOfWeek() == java.time.DayOfWeek.MONDAY) {
+                java.time.LocalDate weekStart = com.buseiny.app.util.TimeUtil.weekStartMonday(d);
+                if (!weekStart.isBefore(firstFullWeekStart)) {
+                    int minutes = sumNutritionMinutesForWeek(weekStart);
+                    if (minutes >= 1080) addBalance(14);
+                    else addBalance(-20);
+                }
+            }
+
+            d = d.plusDays(1);
+        }
+
+        u.setSportStreak(sportStreak);
+        u.setEnglishStreak(engStreak);
+        u.setVietWordsStreak(vietStreak);
+        u.setGenericStreaks(genericStreaks);
+
+        save();
+    }
+
 }

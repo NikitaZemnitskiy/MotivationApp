@@ -1,6 +1,5 @@
 package com.buseiny.app.model;
 
-import java.time.LocalDate;
 import java.util.*;
 
 public class UserState {
@@ -44,4 +43,8 @@ public class UserState {
     public void setGenericDoneByDay(Map<String, Set<String>> v){ this.genericDoneByDay=v; }
     public List<Purchase> getPurchases(){ return purchases; }
     public void setPurchases(List<Purchase> purchases){ this.purchases=purchases; }
+
+    private java.util.Map<String, RouletteEffect> rouletteByDay = new java.util.HashMap<>();
+    public java.util.Map<String, RouletteEffect> getRouletteByDay() { return rouletteByDay; }
+    public void setRouletteByDay(java.util.Map<String, RouletteEffect> m){ this.rouletteByDay = m; }
 }

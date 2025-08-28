@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -31,5 +32,37 @@ public class AdminController {
     public ResponseEntity<?> setGenericDaily(@RequestBody List<GenericDailyTaskDef> items) throws IOException {
         return ResponseEntity.ok(state.setGenericDaily(items));
     }
+
+    // История (для админа можно дергать те же расчеты)
+    @GetMapping("/history/month")
+    public ResponseEntity<?> month(@RequestParam("year") int year, @RequestParam("month") int month) throws Exception {
+        return ResponseEntity.ok(state.computeMonthHistory(year, month));
+    }
+
+    @GetMapping("/history/day")
+    public ResponseEntity<?> day(@RequestParam("date") String date) throws Exception {
+        return ResponseEntity.ok(state.computeDayHistory(date));
+    }
+
+    // Правка баланса
+    @PostMapping("/balance/add")
+    public ResponseEntity<?> addBalance(@RequestParam("delta") int delta) throws Exception {
+        int v = state.adminAddBalance(delta);
+        return ResponseEntity.ok(Map.of("balance", v));
+    }
+
+    @PostMapping("/balance/set")
+    public ResponseEntity<?> setBalance(@RequestParam("value") int value) throws Exception {
+        int v = state.adminSetBalance(value);
+        return ResponseEntity.ok(Map.of("balance", v));
+    }
+
+    // Правка дня + тотальный пересчет
+    @PostMapping("/day/upsert")
+    public ResponseEntity<?> upsertDay(@RequestBody com.buseiny.app.dto.AdminDayEditRequest req) throws Exception {
+        var result = state.adminUpsertDayAndRecalc(req);
+        return ResponseEntity.ok(result); // вернём DayHistory и новый баланс
+    }
+
 
 }

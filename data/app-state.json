@@ -1,56 +1,59 @@
 {
-  "installedAt" : "2025-08-28T15:11:32.9186191",
+  "installedAt" : "2025-08-28T16:09:00.4429364",
   "lastProcessedWeekStart" : "2025-08-25",
   "anna" : {
-    "username" : "Anna",
-    "balance" : 7,
+    "username" : "Анечка",
+    "balance" : 1,
     "avatarUrl" : "/assets/avatar.png",
     "daily" : {
+      "2025-08-27" : {
+        "nutritionMinutes" : 150,
+        "englishMinutes" : 0,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
       "2025-08-28" : {
-        "nutritionMinutes" : 300,
-        "englishMinutes" : 90,
-        "nutritionDailyAwarded" : true,
-        "englishDailyAwarded" : true,
-        "sportAwarded" : true,
-        "yogaAwarded" : true,
-        "vietWordsAwarded" : true
+        "nutritionMinutes" : 90,
+        "englishMinutes" : 15,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
       }
     },
-    "sportStreak" : 1,
-    "englishStreak" : 1,
-    "vietWordsStreak" : 1,
-    "genericStreaks" : { },
-    "genericDoneByDay" : { },
-    "purchases" : [ {
-      "shopItemId" : "walk",
-      "titleSnapshot" : "Прогулка на выбор",
-      "costSnapshot" : 20,
-      "purchasedAt" : "2025-08-28T15:14:44.3943358"
-    }, {
-      "shopItemId" : "walk",
-      "titleSnapshot" : "Прогулка на выбор",
-      "costSnapshot" : 20,
-      "purchasedAt" : "2025-08-28T15:14:45.3715302"
-    } ]
+    "sportStreak" : 0,
+    "englishStreak" : 0,
+    "vietWordsStreak" : 0,
+    "genericStreaks" : {
+      "sleep-before-23" : 1
+    },
+    "genericDoneByDay" : {
+      "2025-08-27" : [ "sleep-before-23" ]
+    },
+    "purchases" : [ ]
   },
   "goals" : [ {
     "id" : "sunrise",
     "title" : "Увидеть рассвет",
     "reward" : 6,
-    "completedAt" : "2025-08-28T15:14:35.7603953",
-    "completed" : true
+    "completedAt" : null,
+    "completed" : false
   }, {
     "id" : "meet-vn-girl",
     "title" : "Познакомиться с вьетнамкой",
     "reward" : 15,
-    "completedAt" : "2025-08-28T15:14:37.2965392",
-    "completed" : true
+    "completedAt" : null,
+    "completed" : false
   }, {
     "id" : "date-vn-girl",
     "title" : "Встретиться с вьетнамкой",
     "reward" : 20,
-    "completedAt" : "2025-08-28T15:14:37.9499062",
-    "completed" : true
+    "completedAt" : null,
+    "completed" : false
   } ],
   "shop" : [ {
     "id" : "lazy-day",
@@ -93,5 +96,15 @@
     "title" : "Секретный подарок",
     "cost" : 300
   } ],
-  "genericDaily" : [ ]
+  "genericDaily" : [ {
+    "id" : "sleep-before-23",
+    "title" : "Лечь спать до 23:00",
+    "dailyReward" : 1,
+    "streakEnabled" : true
+  }, {
+    "id" : "wake-at-8",
+    "title" : "Проснуться в 8:00",
+    "dailyReward" : 1,
+    "streakEnabled" : true
+  } ]
 }

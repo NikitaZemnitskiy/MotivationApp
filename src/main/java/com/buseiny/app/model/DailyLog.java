@@ -4,7 +4,6 @@ public class DailyLog {
     // минуты (за день)
     private int nutritionMinutes;
     private int englishMinutes;
-    // флаги, что дневная награда уже выдана
     private boolean nutritionDailyAwarded;
     private boolean englishDailyAwarded;
     private boolean sportAwarded;
