@@ -94,13 +94,13 @@ public class DailyTaskService {
         var todayKey = LocalDate.now(state.zone()).toString();
         var doneSet = u.getGenericDoneByDay().computeIfAbsent(todayKey, k -> new java.util.HashSet<>());
         if (doneSet.contains(taskId)) return;
-        var defOpt = state.getState().getGenericDaily().stream().filter(d -> d.getId().equals(taskId)).findFirst();
+        var defOpt = state.getState().getGenericDaily().stream().filter(d -> d.id().equals(taskId)).findFirst();
         if (defOpt.isEmpty()) return;
         var def = defOpt.get();
-        state.addDailyWithRouletteBonus("g:" + def.getId(), def.getDailyReward());
+        state.addDailyWithRouletteBonus("g:" + def.id(), def.dailyReward());
         doneSet.add(taskId);
 
-        if (def.isStreakEnabled()) {
+        if (def.streakEnabled()) {
             int streak = u.getGenericStreaks().getOrDefault(taskId, 0) + 1;
             u.getGenericStreaks().put(taskId, streak);
             log.info("Generic task {} streak is now {}", taskId, streak);

@@ -68,18 +68,18 @@ public class RouletteService {
                     rewardById.put(f.id(), f.reward());
                 }
                 for (var gd : state.getState().getGenericDaily()) {
-                    candid.add("g:" + gd.getId());
-                    rewardById.put("g:" + gd.getId(), gd.getDailyReward());
+                    candid.add("g:" + gd.id());
+                    rewardById.put("g:" + gd.id(), gd.dailyReward());
                 }
                 String pick = candid.get(ThreadLocalRandom.current().nextInt(candid.size()));
                 rs.setDailyId(pick);
                 rs.setDailyBaseReward(rewardById.get(pick));
             }
             case GOAL_X2 -> {
-                var incomplete = state.getState().getGoals().stream().filter(g -> g.getCompletedAt() == null).toList();
+                var incomplete = state.getState().getGoals().stream().filter(g -> g.completedAt() == null).toList();
                 if (!incomplete.isEmpty()) {
                     var g = incomplete.get(ThreadLocalRandom.current().nextInt(incomplete.size()));
-                    rs.setGoalId(g.getId());
+                    rs.setGoalId(g.id());
                 } else {
                     rs.setEffect(RouletteEffect.BONUS_POINTS);
                     rs.setBonusPoints(1 + ThreadLocalRandom.current().nextInt(5));
@@ -165,8 +165,8 @@ public class RouletteService {
     private String goalTitle(String goalId) {
         if (goalId == null) return "";
         return state.getState().getGoals().stream()
-                .filter(g -> g.getId().equals(goalId))
-                .findFirst().map(OneTimeGoal::getTitle).orElse(goalId);
+                .filter(g -> g.id().equals(goalId))
+                .findFirst().map(OneTimeGoal::title).orElse(goalId);
     }
 
     private String shopTitle(String id) {
@@ -178,7 +178,7 @@ public class RouletteService {
 
     private String genericTitle(String gid) {
         return state.getState().getGenericDaily().stream()
-                .filter(g -> g.getId().equals(gid))
-                .findFirst().map(GenericDailyTaskDef::getTitle).orElse(gid);
+                .filter(g -> g.id().equals(gid))
+                .findFirst().map(GenericDailyTaskDef::title).orElse(gid);
     }
 }

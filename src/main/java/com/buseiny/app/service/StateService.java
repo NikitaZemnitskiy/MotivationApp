@@ -251,7 +251,7 @@ public class StateService {
         Map<String, Boolean> todayGenericDone = new HashMap<>();
         var doneSet = u.getGenericDoneByDay().getOrDefault(today.toString(), new HashSet<>());
         for (var def : state.getGenericDaily()){
-            todayGenericDone.put(def.getId(), doneSet.contains(def.getId()));
+            todayGenericDone.put(def.id(), doneSet.contains(def.id()));
         }
 
         Map<String, Integer> genericStreaks = new HashMap<>(u.getGenericStreaks());
@@ -413,20 +413,20 @@ public class StateService {
             int streak = 0;
             for (LocalDate d : dates) {
                 var set = state.getAnna().getGenericDoneByDay().getOrDefault(d.toString(), Collections.emptySet());
-                boolean done = set.contains(def.getId());
+                boolean done = set.contains(def.id());
                 if (done) {
                     // daily reward
                     map.computeIfAbsent(d.toString(), k->new ArrayList<>())
-                            .add(new HistoryDTO.Item("Daily: " + def.getTitle(), def.getDailyReward()));
+                            .add(new HistoryDTO.Item("Daily: " + def.title(), def.dailyReward()));
                     // streak bonus
-                    if (def.isStreakEnabled()) {
+                    if (def.streakEnabled()) {
                         streak++;
                         if (streak % 7 == 0) {
                             map.computeIfAbsent(d.toString(), k->new ArrayList<>())
-                                    .add(new HistoryDTO.Item("Streak: " + def.getTitle() + " (7 days)", 7));
+                                    .add(new HistoryDTO.Item("Streak: " + def.title() + " (7 days)", 7));
                         }
                     }
-                } else if (def.isStreakEnabled()) {
+                } else if (def.streakEnabled()) {
                     streak = 0;
                 }
             }
@@ -462,8 +462,8 @@ public class StateService {
 
         // One-time goals completed on this day
         for (var g : state.getGoals()) {
-            if (g.getCompletedAt() != null && g.getCompletedAt().toLocalDate().equals(date)) {
-                items.add(new HistoryDTO.Item("Achievement: " + g.getTitle(), g.getReward()));
+            if (g.completedAt() != null && g.completedAt().toLocalDate().equals(date)) {
+                items.add(new HistoryDTO.Item("Achievement: " + g.title(), g.reward()));
             }
         }
 
@@ -565,7 +565,7 @@ public class StateService {
         for (var k : u.getDaily().keySet()) dates.add(java.time.LocalDate.parse(k));
         for (var k : u.getGenericDoneByDay().keySet()) dates.add(java.time.LocalDate.parse(k));
         for (var g : state.getGoals()) {
-            if (g.getCompletedAt() != null) dates.add(g.getCompletedAt().toLocalDate());
+            if (g.completedAt() != null) dates.add(g.completedAt().toLocalDate());
         }
         for (var p : u.getPurchases()) {
             if (p.purchasedAt() != null) dates.add(p.purchasedAt().toLocalDate());
@@ -618,11 +618,11 @@ public class StateService {
             var doneSet = u.getGenericDoneByDay().getOrDefault(key, java.util.Collections.emptySet());
             if (!doneSet.isEmpty()) {
                 for (var def : state.getGenericDaily()) {
-                    if (doneSet.contains(def.getId())) {
-                        addBalance(def.getDailyReward());
-                        if (def.isStreakEnabled()) {
-                            int s = genericStreaks.getOrDefault(def.getId(), 0) + 1;
-                            genericStreaks.put(def.getId(), s);
+                    if (doneSet.contains(def.id())) {
+                        addBalance(def.dailyReward());
+                        if (def.streakEnabled()) {
+                            int s = genericStreaks.getOrDefault(def.id(), 0) + 1;
+                            genericStreaks.put(def.id(), s);
                             if (s % 7 == 0) addBalance(7);
                         }
                     }
@@ -631,8 +631,8 @@ public class StateService {
 
             // One-time goals on this day
             for (var g : state.getGoals()) {
-                if (g.getCompletedAt() != null && g.getCompletedAt().toLocalDate().equals(d)) {
-                    addBalance(g.getReward());
+                if (g.completedAt() != null && g.completedAt().toLocalDate().equals(d)) {
+                    addBalance(g.reward());
                 }
             }
 
