@@ -6,5 +6,5 @@ public enum TaskType {
     YOGA_CHECK,
     ENGLISH_MINUTES,
     VIET_WORDS_CHECK,
-    GENERIC_CHECK // админские дополнительные ежедневные задачи-чекбоксы
+    GENERIC_CHECK // admin-defined extra daily checkbox tasks
 }

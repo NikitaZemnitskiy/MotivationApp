@@ -1,37 +1,37 @@
-# Бусёины — лёгкая геймификация саморазвития
+# Buseiny – lightweight self-improvement gamification
 
-**Стек:** Java 21, Spring Boot 3, Spring Security (Basic), статический UI (HTML/CSS/JS), JSON-файл для хранения состояния.
+**Stack:** Java 21, Spring Boot 3, Spring Security (basic), static UI (HTML/CSS/JS), JSON file for persistence. Lombok and Java records reduce boilerplate.
 
-## Как запустить
-1. Установи Java 21 и Maven.
-2. В корне проекта:
+## Run
+1. Install Java 21 and Maven.
+2. In the project root:
    ```bash
    mvn spring-boot:run
    ```
-3. Открой в браузере [`http://localhost:8080`](http://localhost:8080).
-4. Когда браузер попросит логин/пароль:
-   - **Пользователь:** `Anna` / `rabota` (роль USER)
-   - **Админ:** `user-admin` / `admin` (роль ADMIN)
+3. Open [http://localhost:8080](http://localhost:8080) in your browser.
+4. When prompted for credentials:
+   - **User:** `Anna` / `rabota`
+   - **Admin:** `user-admin` / `admin`
 
-OpenAPI (Swagger UI) доступен на `/swagger-ui.html` после запуска.
+Swagger UI is available at `/swagger-ui.html` after start.
 
-## Хранилище
-Все данные пишутся в `data/app-state.json`. Файл создаётся автоматически при первом запуске.
+## Storage
+All data is stored in `data/app-state.json` (path configured in `application.yml`). The file is created automatically on first launch.
 
-## Что реализовано
-- Ежедневные задания (минутные и «чек-бокс»).
-- Стрики для Спорта / Английского / 5 слов.
-- Недельная цель по нутрициологии: 18 часов (1080 минут) — +14, иначе −20. Штрафы/награды начинают применяться только после первой полной недели.
-- Магазин с покупками за Бусёины.
-- Разовые цели (достижения).
-- Прогресс недели и таймер до конца недели.
-- Роли: USER видит и отмечает задания, ADMIN правит магазин/разовые цели и может добавить простые ежедневные задачи-«чекбоксы» (с опцией стрика).
+## Features
+- Daily tasks (minute-based and checkboxes)
+- Streaks for sport, English and Vietnamese words
+- Weekly nutrition goal: 18 hours (1080 minutes) gives +14, otherwise −20, applied after the first full week
+- Shop for spending Buseiny points
+- One-time goals (achievements)
+- Weekly progress and countdown
+- Roles: USER marks tasks, ADMIN manages shop/goals and can add generic daily tasks with optional streaks
 
-## Сборка JAR
+## Build JAR
 ```bash
 mvn -DskipTests package
 java -jar target/buseiny-app-1.0.0.jar
 ```
 
-## Замечание
-UI простой и самодостаточный. Для красивостей использованы Tailwind CDN + vanilla JS.
+## Note
+The UI is simple and self-contained using Tailwind CDN and vanilla JS.

@@ -1,6 +1,7 @@
 package com.buseiny.app.controller;
 
 import com.buseiny.app.service.StateService;
+import com.buseiny.app.service.DailyTaskService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +13,11 @@ import java.util.Map;
 public class ApiController {
 
     private final StateService state;
+    private final DailyTaskService daily;
 
-    public ApiController(StateService state){
+    public ApiController(StateService state, DailyTaskService daily){
         this.state = state;
+        this.daily = daily;
     }
 
     @GetMapping("/me")
@@ -29,7 +32,7 @@ public class ApiController {
         if (minutes != 15 && minutes != 30 && minutes != 60){
             return ResponseEntity.badRequest().body("minutes must be 15|30|60");
         }
-        state.addNutritionMinutes(minutes);
+        daily.addNutritionMinutes(minutes);
         return ResponseEntity.ok(state.status());
     }
 
@@ -38,32 +41,32 @@ public class ApiController {
         if (minutes != 15 && minutes != 30 && minutes != 60){
             return ResponseEntity.badRequest().body("minutes must be 15|30|60");
         }
-        state.addEnglishMinutes(minutes);
+        daily.addEnglishMinutes(minutes);
         return ResponseEntity.ok(state.status());
     }
 
     @PostMapping("/tasks/sport/check")
     public ResponseEntity<?> checkSport() throws IOException {
-        state.checkSport();
+        daily.checkSport();
         return ResponseEntity.ok(state.status());
     }
 
     @PostMapping("/tasks/yoga/check")
     public ResponseEntity<?> checkYoga() throws IOException {
-        state.checkYoga();
+        daily.checkYoga();
         return ResponseEntity.ok(state.status());
     }
 
     @PostMapping("/tasks/vietnamese/check")
     public ResponseEntity<?> checkViet() throws IOException {
-        state.checkVietWords();
+        daily.checkVietWords();
         return ResponseEntity.ok(state.status());
     }
 
     // generic daily (admin-defined simple check task)
     @PostMapping("/tasks/generic/{id}/check")
     public ResponseEntity<?> checkGeneric(@PathVariable("id") String id) throws IOException {
-        state.checkGenericTask(id);
+        daily.checkGenericTask(id);
         return ResponseEntity.ok(state.status());
     }
 

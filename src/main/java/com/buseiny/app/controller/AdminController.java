@@ -33,7 +33,7 @@ public class AdminController {
         return ResponseEntity.ok(state.setGenericDaily(items));
     }
 
-    // История (для админа можно дергать те же расчеты)
+    // History endpoints reuse common calculations
     @GetMapping("/history/month")
     public ResponseEntity<?> month(@RequestParam("year") int year, @RequestParam("month") int month) throws Exception {
         return ResponseEntity.ok(state.computeMonthHistory(year, month));
@@ -44,7 +44,7 @@ public class AdminController {
         return ResponseEntity.ok(state.computeDayHistory(date));
     }
 
-    // Правка баланса
+    // Adjust balance
     @PostMapping("/balance/add")
     public ResponseEntity<?> addBalance(@RequestParam("delta") int delta) throws Exception {
         int v = state.adminAddBalance(delta);
@@ -57,11 +57,11 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("balance", v));
     }
 
-    // Правка дня + тотальный пересчет
+    // Edit day and recalculate totals
     @PostMapping("/day/upsert")
     public ResponseEntity<?> upsertDay(@RequestBody com.buseiny.app.dto.AdminDayEditRequest req) throws Exception {
         var result = state.adminUpsertDayAndRecalc(req);
-        return ResponseEntity.ok(result); // вернём DayHistory и новый баланс
+        return ResponseEntity.ok(result); // returns DayHistory and new balance
     }
 
 

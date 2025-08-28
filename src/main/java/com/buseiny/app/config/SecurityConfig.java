@@ -26,31 +26,31 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // для корректного "401 вместо 302" на /api/**
+        // ensure API paths return 401 instead of 302 redirects
         var apiMatcher = new AntPathRequestMatcher("/api/**");
         RequestCache requestCache = new HttpSessionRequestCache();
 
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // статическая страница логина и ассеты — открыты
+                        // static login page and assets are public
                         .requestMatchers("/login.html", "/assets/**", "/favicon.ico",
                                 "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
-                        // главная HTML — открыта (чтобы не было лупов). API защищены отдельно.
+                        // main HTML is public to avoid redirect loops; APIs are protected separately
                         .requestMatchers(HttpMethod.GET, "/", "/index.html").permitAll()
 
-                        // админка — только ADMIN
+                        // admin endpoints require ADMIN role
                         .requestMatchers("/admin.html").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // любые API — только авторизованным
+                        // any API request requires authentication
                         .requestMatchers("/api/**").authenticated()
 
-                        // всё остальное — требует логина
+                        // everything else requires login
                         .anyRequest().authenticated()
                 )
-                // ВАЖНО: для API-урлов отдаём 401, а не 302 → фронт поймёт и уйдёт на /login.html
+                // return 401 for API URLs so frontend can redirect to /login.html
                 .exceptionHandling(ex -> ex
                         .defaultAuthenticationEntryPointFor(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), apiMatcher
@@ -58,22 +58,22 @@ public class SecurityConfig {
                 )
                 .requestCache(cache -> cache.requestCache(requestCache))
                 .formLogin(form -> form
-                        .loginPage("/login.html")          // GET: отдаём статику
-                        .loginProcessingUrl("/login")       // POST: обрабатывает Spring Security
+                        .loginPage("/login.html")          // GET: serve static login page
+                        .loginProcessingUrl("/login")       // POST: handled by Spring Security
                         .successHandler((req, res, auth) -> {
-                            // 1) если есть явный redirect (прокинули hidden-полем) — идём туда
+                            // 1) explicit redirect parameter
                             String redirect = req.getParameter("redirect");
                             if (redirect != null && !redirect.isBlank()) {
                                 res.sendRedirect(redirect);
                                 return;
                             }
-                            // 2) если была сохранённая целевая страница (SavedRequest) — туда
+                            // 2) saved request destination
                             var saved = requestCache.getRequest(req, res);
                             if (saved != null) {
                                 res.sendRedirect(saved.getRedirectUrl());
                                 return;
                             }
-                            // 3) иначе — по ролям
+                            // 3) otherwise redirect based on role
                             boolean isAdmin = auth.getAuthorities().stream()
                                     .map(GrantedAuthority::getAuthority)
                                     .anyMatch(a -> a.equals("ROLE_ADMIN"));
