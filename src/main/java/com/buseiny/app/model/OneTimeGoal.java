@@ -1,21 +1,20 @@
 package com.buseiny.app.model;
 
-import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Data;
+import java.time.LocalDateTime;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
-public class OneTimeGoal {
-    private String id;
-    private String title;
-    private int reward;
-    private LocalDateTime completedAt; // null если не выполнено
-
-    public OneTimeGoal() {}
+public record OneTimeGoal(
+        String id,
+        String title,
+        int reward,
+        LocalDateTime completedAt
+) {
     public OneTimeGoal(String id, String title, int reward) {
-        this.id = id; this.title = title; this.reward = reward;
+        this(id, title, reward, null);
     }
 
-    public boolean isCompleted(){ return completedAt != null; }
+    public boolean isCompleted() {
+        return completedAt != null;
+    }
 }

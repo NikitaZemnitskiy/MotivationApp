@@ -2,11 +2,13 @@ package com.buseiny.app.service;
 
 import com.buseiny.app.model.DailyLog;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.time.LocalDate;
 
 @Service
+@Slf4j
 public class DailyTaskService {
     private final StateService state;
 
@@ -16,11 +18,12 @@ public class DailyTaskService {
 
     public synchronized void addNutritionMinutes(int minutes) throws IOException {
         state.processDayBoundariesIfNeeded();
-        DailyLog log = state.todayLog();
-        log.setNutritionMinutes(log.getNutritionMinutes() + minutes);
-        if (!log.isNutritionDailyAwarded() && log.getNutritionMinutes() >= 180) {
+        DailyLog logEntry = state.todayLog();
+        logEntry.setNutritionMinutes(logEntry.getNutritionMinutes() + minutes);
+        if (!logEntry.isNutritionDailyAwarded() && logEntry.getNutritionMinutes() >= 180) {
             state.addDailyWithRouletteBonus("nutrition", 2);
-            log.setNutritionDailyAwarded(true);
+            logEntry.setNutritionDailyAwarded(true);
+            log.info("Nutrition daily completed, bonus applied");
         }
         state.save();
     }
@@ -28,12 +31,13 @@ public class DailyTaskService {
     public synchronized void addEnglishMinutes(int minutes) throws IOException {
         state.processDayBoundariesIfNeeded();
         var u = state.getState().getAnna();
-        DailyLog log = state.todayLog();
-        log.setEnglishMinutes(log.getEnglishMinutes() + minutes);
-        if (!log.isEnglishDailyAwarded() && log.getEnglishMinutes() >= 60) {
+        DailyLog logEntry = state.todayLog();
+        logEntry.setEnglishMinutes(logEntry.getEnglishMinutes() + minutes);
+        if (!logEntry.isEnglishDailyAwarded() && logEntry.getEnglishMinutes() >= 60) {
             state.addDailyWithRouletteBonus("english", 1);
-            log.setEnglishDailyAwarded(true);
+            logEntry.setEnglishDailyAwarded(true);
             u.setEnglishStreak(u.getEnglishStreak() + 1);
+            log.info("English streak is now {}", u.getEnglishStreak());
             if (u.getEnglishStreak() % 7 == 0) {
                 state.addBalance(7);
             }
@@ -44,11 +48,12 @@ public class DailyTaskService {
     public synchronized void checkSport() throws IOException {
         state.processDayBoundariesIfNeeded();
         var u = state.getState().getAnna();
-        DailyLog log = state.todayLog();
-        if (!log.isSportAwarded()) {
+        DailyLog logEntry = state.todayLog();
+        if (!logEntry.isSportAwarded()) {
             state.addDailyWithRouletteBonus("sport", 1);
-            log.setSportAwarded(true);
+            logEntry.setSportAwarded(true);
             u.setSportStreak(u.getSportStreak() + 1);
+            log.info("Sport streak is now {}", u.getSportStreak());
             if (u.getSportStreak() % 7 == 0) {
                 state.addBalance(7);
             }
@@ -58,10 +63,11 @@ public class DailyTaskService {
 
     public synchronized void checkYoga() throws IOException {
         state.processDayBoundariesIfNeeded();
-        DailyLog log = state.todayLog();
-        if (!log.isYogaAwarded()) {
+        DailyLog logEntry = state.todayLog();
+        if (!logEntry.isYogaAwarded()) {
             state.addDailyWithRouletteBonus("yoga", 1);
-            log.setYogaAwarded(true);
+            logEntry.setYogaAwarded(true);
+            log.info("Yoga completed today");
         }
         state.save();
     }
@@ -69,11 +75,12 @@ public class DailyTaskService {
     public synchronized void checkVietWords() throws IOException {
         state.processDayBoundariesIfNeeded();
         var u = state.getState().getAnna();
-        DailyLog log = state.todayLog();
-        if (!log.isVietWordsAwarded()) {
+        DailyLog logEntry = state.todayLog();
+        if (!logEntry.isVietWordsAwarded()) {
             state.addDailyWithRouletteBonus("viet", 1);
-            log.setVietWordsAwarded(true);
+            logEntry.setVietWordsAwarded(true);
             u.setVietWordsStreak(u.getVietWordsStreak() + 1);
+            log.info("Vietnamese words streak is now {}", u.getVietWordsStreak());
             if (u.getVietWordsStreak() % 7 == 0) {
                 state.addBalance(7);
             }
@@ -96,6 +103,7 @@ public class DailyTaskService {
         if (def.isStreakEnabled()) {
             int streak = u.getGenericStreaks().getOrDefault(taskId, 0) + 1;
             u.getGenericStreaks().put(taskId, streak);
+            log.info("Generic task {} streak is now {}", taskId, streak);
             if (streak % 7 == 0) {
                 state.addBalance(7);
             }

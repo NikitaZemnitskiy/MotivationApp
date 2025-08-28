@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class AppState {
     private LocalDateTime installedAt;
-    private LocalDate lastProcessedWeekStart; // понедельник локальной зоны
+    private LocalDate lastProcessedWeekStart; // week start (Monday) in local zone
 
     private UserState anna = new UserState();
 

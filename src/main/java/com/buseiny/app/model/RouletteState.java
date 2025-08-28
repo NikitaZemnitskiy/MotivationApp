@@ -6,22 +6,22 @@ import lombok.Data;
 
 @Data
 public class RouletteState {
-    private LocalDate date;              // на какой день выдан результат
+    private LocalDate date;              // day the result applies to
     private RouletteEffect effect;
 
-    // Для DAILY_X2
-    private String dailyId;              // id выбранного дейлика
-    private Integer dailyBaseReward;     // базовая награда
-    private boolean dailyPenaltyApplied; // штраф уже применён?
+    // For DAILY_X2
+    private String dailyId;              // chosen daily id
+    private Integer dailyBaseReward;     // base reward
+    private boolean dailyPenaltyApplied; // penalty applied?
 
-    // Для GOAL_X2
+    // For GOAL_X2
     private String goalId;
 
-    // Для BONUS_POINTS
+    // For BONUS_POINTS
     private Integer bonusPoints;         // 1..5
 
-    // Для магазинов
-    private String discountedShopId;     // -50% на itemId
-    private String freeShopId;           // бесплатный itemId (<100)
+    // For shop rewards
+    private String discountedShopId;     // 50% off item id
+    private String freeShopId;           // free item id (<100)
 }
 

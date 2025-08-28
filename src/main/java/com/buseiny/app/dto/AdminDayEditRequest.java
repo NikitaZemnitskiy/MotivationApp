@@ -2,12 +2,15 @@ package com.buseiny.app.dto;
 
 import java.util.Set;
 
-public class AdminDayEditRequest {
-    public String date;                  // yyyy-MM-dd (обязательное)
-    public Integer nutritionMinutes;     // если null — не менять
-    public Integer englishMinutes;       // если null — не менять
-    public Boolean sportDone;            // если null — не менять
-    public Boolean yogaDone;             // если null — не менять
-    public Boolean vietDone;             // если null — не менять
-    public Set<String> genericDoneIds;   // полный набор id generic-задач, выполненных в этот день (null — не менять)
-}
+/**
+ * Admin payload for editing a day's log. Fields set to {@code null} are left unchanged.
+ */
+public record AdminDayEditRequest(
+        String date,
+        Integer nutritionMinutes,
+        Integer englishMinutes,
+        Boolean sportDone,
+        Boolean yogaDone,
+        Boolean vietDone,
+        Set<String> genericDoneIds
+) {}

@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class DailyLog {
-    // минуты (за день)
     private int nutritionMinutes;
     private int englishMinutes;
     private boolean nutritionDailyAwarded;
