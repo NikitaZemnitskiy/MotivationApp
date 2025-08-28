@@ -17,6 +17,7 @@
     <div class="ml-auto text-right">
       <div class="text-xs opacity-75">Текущая неделя с <span id="weekStart"></span></div>
       <div class="text-xs opacity-75">До конца недели: <span id="weekTimer"></span></div>
+      <button class="btn" onclick="openWheel()">Рулетка 🎡</button>
       <button class="btn" onclick="openHistory()">История</button>
     </div>
 
@@ -152,6 +153,22 @@
   }
 
   .pill { padding:.15rem .5rem; border-radius:999px; font-size:.7rem; }
+
+  #wheel {
+    background:
+      conic-gradient(
+        rgba(236,72,153,.25) 0 40%,
+        rgba(234,179,8,.25) 40% 70%,
+        rgba(59,130,246,.25) 70% 80%,
+        rgba(34,197,94,.25) 80% 90%,
+        rgba(244,63,94,.25) 90% 100%
+      );
+  }
+  .spin { animation: spin 1.6s cubic-bezier(.17,.67,.32,1.27) 1; }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(1440deg); }
+  }
 </style>
 
 <script>
@@ -378,8 +395,56 @@
     $('#histDayPanel').classList.remove('hidden');
   }
 
+  function openWheel(){
+    const m = document.getElementById('wheelModal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    loadWheel();
+  }
+  function closeWheel(){
+    const m = document.getElementById('wheelModal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+  }
+  async function loadWheel(){
+    const j = await api('/api/roulette/today');
+    if (!j) return;
+    document.getElementById('wheelMsg').textContent = j.message || '';
+    document.getElementById('spinBtn').disabled = !j.canSpin;
+  }
+  async function spinWheel(){
+    const wheel = document.getElementById('wheel');
+    wheel.classList.remove('spin'); void wheel.offsetWidth; wheel.classList.add('spin');
+    const j = await api('/api/roulette/spin', {method:'POST'});
+    if (!j) return;
+    document.getElementById('wheelMsg').textContent = j.message || '';
+    document.getElementById('spinBtn').disabled = true;
+    await load();
+  }
+
   load();
 </script>
+<div id="wheelModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+  <div class="bg-slate-900 w-full max-w-md rounded-2xl shadow-xl p-4">
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-lg font-semibold">Рулетка</div>
+      <button class="btn" onclick="closeWheel()">Закрыть</button>
+    </div>
+    <div class="relative mx-auto my-3">
+      <div id="wheel" class="w-64 h-64 rounded-full border-4 border-pink-500/50 overflow-hidden"></div>
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div class="w-0 h-0 border-l-8 border-r-8 border-b-[18px] border-transparent border-b-amber-400 -mt-64"></div>
+      </div>
+    </div>
+    <div id="wheelMsg" class="text-sm text-center opacity-80 min-h-[2rem]"></div>
+    <div class="flex justify-center gap-2 mt-3">
+      <button id="spinBtn" class="btn" onclick="spinWheel()">Крутить</button>
+    </div>
+    <div class="text-xs opacity-60 mt-3 text-center">
+      Шансы: дейлик x2 (40%), цель x2 (30%), +1..5 (10%), скидка 50% (10%), бесплатно <100 (10%)
+    </div>
+  </div>
+</div>
 <!-- История: модальное окно -->
 <div id="histModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
   <div class="bg-slate-900 w-full max-w-3xl rounded-2xl shadow-xl p-4">
