@@ -1,0 +1,97 @@
+{
+  "installedAt" : "2025-08-28T15:11:32.9186191",
+  "lastProcessedWeekStart" : "2025-08-25",
+  "anna" : {
+    "username" : "Anna",
+    "balance" : 7,
+    "avatarUrl" : "/assets/avatar.png",
+    "daily" : {
+      "2025-08-28" : {
+        "nutritionMinutes" : 300,
+        "englishMinutes" : 90,
+        "nutritionDailyAwarded" : true,
+        "englishDailyAwarded" : true,
+        "sportAwarded" : true,
+        "yogaAwarded" : true,
+        "vietWordsAwarded" : true
+      }
+    },
+    "sportStreak" : 1,
+    "englishStreak" : 1,
+    "vietWordsStreak" : 1,
+    "genericStreaks" : { },
+    "genericDoneByDay" : { },
+    "purchases" : [ {
+      "shopItemId" : "walk",
+      "titleSnapshot" : "Прогулка на выбор",
+      "costSnapshot" : 20,
+      "purchasedAt" : "2025-08-28T15:14:44.3943358"
+    }, {
+      "shopItemId" : "walk",
+      "titleSnapshot" : "Прогулка на выбор",
+      "costSnapshot" : 20,
+      "purchasedAt" : "2025-08-28T15:14:45.3715302"
+    } ]
+  },
+  "goals" : [ {
+    "id" : "sunrise",
+    "title" : "Увидеть рассвет",
+    "reward" : 6,
+    "completedAt" : "2025-08-28T15:14:35.7603953",
+    "completed" : true
+  }, {
+    "id" : "meet-vn-girl",
+    "title" : "Познакомиться с вьетнамкой",
+    "reward" : 15,
+    "completedAt" : "2025-08-28T15:14:37.2965392",
+    "completed" : true
+  }, {
+    "id" : "date-vn-girl",
+    "title" : "Встретиться с вьетнамкой",
+    "reward" : 20,
+    "completedAt" : "2025-08-28T15:14:37.9499062",
+    "completed" : true
+  } ],
+  "shop" : [ {
+    "id" : "lazy-day",
+    "title" : "День тюлень (без осуждения)",
+    "cost" : 100
+  }, {
+    "id" : "walk",
+    "title" : "Прогулка на выбор",
+    "cost" : 20
+  }, {
+    "id" : "nikita-sport",
+    "title" : "Занятие спортом Никиты",
+    "cost" : 30
+  }, {
+    "id" : "nikita-shopping",
+    "title" : "Поездка на шопинг Никиты",
+    "cost" : 50
+  }, {
+    "id" : "coffee-out",
+    "title" : "Поход в кофейню (или кофе домой)",
+    "cost" : 30
+  }, {
+    "id" : "coffee-sweet",
+    "title" : "Кофе от Никиты с конфетой и комплиментами",
+    "cost" : 10
+  }, {
+    "id" : "day-trip",
+    "title" : "Поездка куда хочешь на целый день",
+    "cost" : 250
+  }, {
+    "id" : "movie-night",
+    "title" : "Вечер кино (с ужина и до сна)",
+    "cost" : 75
+  }, {
+    "id" : "no-gadgets",
+    "title" : "День без гаджетов только с любимкой",
+    "cost" : 200
+  }, {
+    "id" : "secret-gift",
+    "title" : "Секретный подарок",
+    "cost" : 300
+  } ],
+  "genericDaily" : [ ]
+}

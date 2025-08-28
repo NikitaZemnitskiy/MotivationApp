@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Админ — Бусёины</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <div class="max-w-5xl mx-auto p-4 space-y-6">
+    <header class="flex items-center gap-4 mt-4">
+      <h1 class="text-2xl font-bold">Админ-панель</h1>
+      <div class="ml-auto text-xs opacity-70">Логин: user-admin / admin (Basic Auth)</div>
+    </header>
+
+    <section class="grid md:grid-cols-2 gap-6">
+      <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
+        <h2 class="font-semibold mb-3">Магазин</h2>
+        <textarea id="shopJson" class="w-full h-64 p-2 rounded bg-slate-800 font-mono text-xs"></textarea>
+        <div class="mt-2 flex gap-2">
+          <button class="btn" onclick="saveShop()">Сохранить</button>
+          <span class="text-xs opacity-70">Массив объектов: {id,title,cost}</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
+        <h2 class="font-semibold mb-3">Разовые цели</h2>
+        <textarea id="goalsJson" class="w-full h-64 p-2 rounded bg-slate-800 font-mono text-xs"></textarea>
+        <div class="mt-2 flex gap-2">
+          <button class="btn" onclick="saveGoals()">Сохранить</button>
+          <span class="text-xs opacity-70">Массив объектов: {id,title,reward,completedAt|null}</span>
+        </div>
+      </div>
+
+      <div class="bg-slate-900/70 p-4 rounded-2xl shadow md:col-span-2">
+        <h2 class="font-semibold mb-3">Ежедневные (доп.) — простые чекбоксы</h2>
+        <textarea id="dailyJson" class="w-full h-64 p-2 rounded bg-slate-800 font-mono text-xs"></textarea>
+        <div class="mt-2 flex gap-2">
+          <button class="btn" onclick="saveDaily()">Сохранить</button>
+          <span class="text-xs opacity-70">Массив объектов: {id,title,dailyReward,streakEnabled}</span>
+        </div>
+      </div>
+    </section>
+  </div>
+  <style>
+    .btn { padding:.5rem .75rem; background: rgba(14,165,233,0.2); border:1px solid rgba(14,165,233,0.5); border-radius:.75rem; }
+  </style>
+  <script>
+    let authHeader = 'Basic ' + btoa('user-admin:admin');
+    async function api(url, body){
+      const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json','Authorization':authHeader}, body: JSON.stringify(body)});
+      if (!r.ok){ throw new Error(await r.text()); }
+      return r.json();
+    }
+    async function load(){
+      const me = await fetch('/api/me', {headers:{'Authorization':authHeader}}).then(r=>r.json());
+      document.querySelector('#shopJson').value = JSON.stringify(me.shop, null, 2);
+      document.querySelector('#goalsJson').value = JSON.stringify(me.goals, null, 2);
+      document.querySelector('#dailyJson').value = JSON.stringify(me.genericDaily || [], null, 2);
+    }
+    async function saveShop(){ await api('/api/admin/shop', JSON.parse(document.querySelector('#shopJson').value)); alert('OK'); }
+    async function saveGoals(){ await api('/api/admin/goals', JSON.parse(document.querySelector('#goalsJson').value)); alert('OK'); }
+    async function saveDaily(){ await api('/api/admin/daily/generic', JSON.parse(document.querySelector('#dailyJson').value)); alert('OK'); }
+    load();
+  </script>
+</body>
+</html>

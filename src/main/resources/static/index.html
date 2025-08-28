@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Бусёины — для любимой</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <div class="max-w-4xl mx-auto p-4 space-y-6">
+    <header class="flex items-center gap-4 mt-4">
+      <img id="avatar" src="/assets/avatar.png" alt="avatar" class="w-16 h-16 rounded-full ring-2 ring-pink-400"/>
+      <div>
+        <h1 class="text-2xl font-bold">Привет, <span id="username">Анна</span> 💖</h1>
+        <p class="text-sm opacity-80">Твой баланс: <span id="balance" class="font-semibold">0</span> Бусёинов</p>
+      </div>
+      <div class="ml-auto text-right">
+        <div class="text-xs opacity-75">Текущая неделя с <span id="weekStart"></span></div>
+        <div class="text-xs opacity-75">До конца недели: <span id="weekTimer"></span></div>
+      </div>
+    </header>
+
+    <section class="grid md:grid-cols-3 gap-4">
+      <div class="md:col-span-2 space-y-4">
+        <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
+          <h2 class="font-semibold mb-2">Ежедневные задания</h2>
+          <div class="space-y-3 text-sm">
+            <div class="p-3 bg-slate-800/60 rounded-xl">
+              <div class="flex justify-between items-center">
+                <div>
+                  <div class="font-medium">Нутрициология 3 часа/день — +2</div>
+                  <div class="opacity-80">Сегодня: <span id="nutriMin">0</span>/180 минут</div>
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn" onclick="add('nutrition',15)">+15</button>
+                  <button class="btn" onclick="add('nutrition',30)">+30</button>
+                  <button class="btn" onclick="add('nutrition',60)">+60</button>
+                </div>
+              </div>
+              <div id="nutriBadge" class="text-xs mt-1"></div>
+            </div>
+
+            <div class="p-3 bg-slate-800/60 rounded-xl">
+              <div class="flex justify-between items-center">
+                <div>
+                  <div class="font-medium">Английский 1 час — +1 (стрик +7/7)</div>
+                  <div class="opacity-80">Сегодня: <span id="engMin">0</span>/60 минут</div>
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn" onclick="add('english',15)">+15</button>
+                  <button class="btn" onclick="add('english',30)">+30</button>
+                  <button class="btn" onclick="add('english',60)">+60</button>
+                </div>
+              </div>
+              <div class="text-xs mt-1 opacity-80">Текущий стрик: <span id="engStreak">0</span></div>
+            </div>
+
+            <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
+              <div>
+                <div class="font-medium">Спорт — +1 (стрик +7/7)</div>
+                <div class="text-xs opacity-80">Текущий стрик: <span id="sportStreak">0</span></div>
+              </div>
+              <button class="btn" onclick="post('/api/tasks/sport/check')">Сделано</button>
+            </div>
+
+            <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
+              <div><div class="font-medium">Йога — +1</div></div>
+              <button class="btn" onclick="post('/api/tasks/yoga/check')">Сделано</button>
+            </div>
+
+            <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
+              <div>
+                <div class="font-medium">5 вьетнамских слов — +1 (стрик +7/7)</div>
+                <div class="text-xs opacity-80">Текущий стрик: <span id="vietStreak">0</span></div>
+              </div>
+              <button class="btn" onclick="post('/api/tasks/vietnamese/check')">Сделано</button>
+            </div>
+
+            <div id="genericDaily" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
+          <h2 class="font-semibold mb-2">Общие разовые цели</h2>
+          <div id="goals" class="grid sm:grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
+          <h2 class="font-semibold mb-2">Недельное обязательное</h2>
+          <div class="text-sm opacity-90">Нутрициология 18 часов/неделю</div>
+          <div class="w-full bg-slate-800 rounded-full h-3 my-2">
+            <div id="weekBar" class="bg-pink-500 h-3 rounded-full" style="width:0%"></div>
+          </div>
+          <div class="text-xs opacity-80">Собрано: <span id="weekMin">0</span>/1080 минут</div>
+          <p class="text-xs mt-2 opacity-60">
+            По итогам недели: &ge;1080 мин → +14, иначе −20. Штраф/награда срабатывают автоматически при переходе недели.
+          </p>
+        </div>
+
+        <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
+          <h2 class="font-semibold mb-2">Магазин</h2>
+          <div id="shop" class="space-y-2"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-center text-xs opacity-60 py-6">Сделано с любовью 💘</footer>
+  </div>
+
+  <style>
+    .btn { padding: .5rem .75rem; background: rgba(236,72,153,0.2); border:1px solid rgba(236,72,153,0.5);
+           border-radius: .75rem; }
+    .btn[disabled]{ opacity:.5; filter:grayscale(1); cursor:not-allowed; }
+    .pill { padding:.15rem .5rem; border-radius:999px; font-size:.7rem; }
+  </style>
+
+  <script>
+    const $ = sel => document.querySelector(sel);
+    let authHeader = null;
+
+    // Try to use stored credentials for API
+    function setupAuth(){
+      const u = localStorage.getItem('auth_u');
+      const p = localStorage.getItem('auth_p');
+      if (u && p){
+        authHeader = 'Basic ' + btoa(u + ':' + p);
+      } else {
+        // Let browser prompt basic auth if no stored creds
+        authHeader = null;
+      }
+    }
+
+    async function api(url, opts={}){
+      opts.headers = opts.headers || {};
+      if (authHeader) opts.headers['Authorization'] = authHeader;
+      const r = await fetch(url, opts);
+      if (r.status === 401){
+        alert('Нужна авторизация. Нажми ОК и введи логин/пароль в всплывшем диалоге браузера или задай их в localStorage.');
+      }
+      if (!r.ok){
+        const t = await r.text();
+        throw new Error(t || ('HTTP '+r.status));
+      }
+      return r.json();
+    }
+
+    function formatTimer(sec){
+      const now = Math.floor(Date.now()/1000);
+      let left = Math.max(0, sec - now);
+      const d = Math.floor(left/86400);
+      left -= d*86400;
+      const h = Math.floor(left/3600);
+      left -= h*3600;
+      const m = Math.floor(left/60);
+      const s = left - m*60;
+      return `${d}д ${h}ч ${m}м ${s}с`;
+    }
+
+    async function load(){
+      setupAuth();
+      const data = await api('/api/me');
+      $('#username').textContent = data.username;
+      $('#avatar').src = data.avatarUrl || '/assets/avatar.png';
+      $('#balance').textContent = data.balance;
+      $('#nutriMin').textContent = data.todayNutritionMinutes;
+      $('#engMin').textContent = data.todayEnglishMinutes;
+      $('#engStreak').textContent = data.englishStreak;
+      $('#sportStreak').textContent = data.sportStreak;
+      $('#vietStreak').textContent = data.vietStreak;
+      $('#weekMin').textContent = data.weekNutritionMinutes;
+      $('#weekStart').textContent = data.currentWeekStart;
+
+      const pct = Math.min(100, Math.round(100*data.weekNutritionMinutes / data.weekGoalMinutes));
+      $('#weekBar').style.width = pct + '%';
+
+      const badge = $('#nutriBadge');
+      badge.innerHTML = data.todayNutritionAwarded ? '<span class="pill bg-pink-600/40">+2 за сегодня получены</span>'
+        : '<span class="pill bg-slate-700/70">Нужно добрать до 180 минут</span>';
+
+      const g = $('#goals');
+      g.innerHTML='';
+      data.goals.forEach(goal => {
+        const done = !!goal.completedAt;
+        const btn = done ? `<button class="btn" disabled>Готово</button>`
+          : `<button class="btn" onclick="post('/api/goals/${goal.id}/complete')">Засчитать (+${goal.reward})</button>`;
+        g.insertAdjacentHTML('beforeend', `
+          <div class="p-3 bg-slate-800/60 rounded-xl flex items-center justify-between">
+            <div>${goal.title} — <span class="opacity-80">+${goal.reward}</span></div>
+            ${btn}
+          </div>
+        `);
+      });
+
+      const shop = $('#shop'); shop.innerHTML='';
+      data.shop.forEach(item => {
+        const afford = data.balance >= item.cost;
+        shop.insertAdjacentHTML('beforeend', `
+          <div class="p-3 bg-slate-800/60 rounded-xl flex items-center justify-between">
+            <div>${item.title}</div>
+            <div class="flex items-center gap-2">
+              <div class="text-xs opacity-80">${item.cost}</div>
+              <button class="btn" ${afford?'':'disabled'} onclick="post('/api/shop/${item.id}/purchase')">Купить</button>
+            </div>
+          </div>
+        `);
+      });
+
+      // generic daily
+      const gd = $('#genericDaily'); gd.innerHTML = '';
+      (data.genericDaily || []).forEach(def => {
+        const done = data.todayGenericDone && data.todayGenericDone[def.id];
+        const streak = (data.genericStreaks && data.genericStreaks[def.id]) || 0;
+        gd.insertAdjacentHTML('beforeend', `
+          <div class="p-3 bg-slate-800/60 rounded-xl flex items-center justify-between">
+            <div>
+              <div class="font-medium">${def.title} — +${def.dailyReward}${def.streakEnabled?' (стрик +7/7)':''}</div>
+              ${def.streakEnabled?`<div class="text-xs opacity-80">Стрик: ${streak}</div>`:''}
+            </div>
+            <button class="btn" ${done?'disabled':''} onclick="post('/api/tasks/generic/${def.id}/check')">${done?'Готово':'Сделано'}</button>
+          </div>
+        `);
+      });
+
+      // timer
+      function tick(){
+        $('#weekTimer').textContent = formatTimer(data.secondsUntilWeekEndEpoch);
+      }
+      clearInterval(window.__t);
+      tick();
+      window.__t = setInterval(tick, 1000);
+    }
+
+    async function post(url){
+      await api(url, {method:'POST'});
+      await load();
+    }
+
+    async function add(kind, m){
+      await api(`/api/tasks/${kind}/add?minutes=${m}`, {method:'POST'});
+      await load();
+    }
+
+    load();
+  </script>
+</body>
+</html>
