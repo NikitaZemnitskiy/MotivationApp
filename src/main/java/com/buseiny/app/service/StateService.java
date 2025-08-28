@@ -14,8 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.time.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import com.buseiny.app.dto.HistoryDTO;
+import com.buseiny.app.dto.RouletteDTO;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -30,6 +32,16 @@ public class StateService {
     private final ObjectMapper mapper;
     private AppState state;
     private static final DateTimeFormatter D = DateTimeFormatter.ISO_LOCAL_DATE;
+
+    private static final Random RNG = new Random();
+    private record FixedDaily(String id, int reward, Function<DailyLog, Boolean> isDone) {}
+    private static final List<FixedDaily> FIXED = List.of(
+            new FixedDaily("nutrition", 2, d -> d != null && d.isNutritionDailyAwarded()),
+            new FixedDaily("english", 1, d -> d != null && d.isEnglishDailyAwarded()),
+            new FixedDaily("sport", 1, d -> d != null && d.isSportAwarded()),
+            new FixedDaily("yoga", 1, d -> d != null && d.isYogaAwarded()),
+            new FixedDaily("viet", 1, d -> d != null && d.isVietWordsAwarded())
+    );
 
 
     public StateService(){
@@ -161,14 +173,74 @@ public class StateService {
         }
     }
 
+    private void processDayBoundariesIfNeeded() throws IOException {
+        processWeekIfNeeded();
+        var u = state.getAnna();
+        var today = LocalDate.now(zone());
+        var rs = u.getTodayRoulette();
+        if (rs == null) return;
+        if (rs.getEffect() == RouletteEffect.DAILY_X2
+                && !today.equals(rs.getDate())
+                && !rs.isDailyPenaltyApplied()) {
+            var dailyDone = isDailyDone(rs.getDate(), rs.getDailyId());
+            if (!dailyDone) {
+                addBalance(-Math.abs(rs.getDailyBaseReward()));
+            }
+            rs.setDailyPenaltyApplied(true);
+            save();
+        }
+    }
+
+    private boolean isDailyDone(LocalDate date, String dailyId){
+        var log = state.getAnna().getDaily().get(date.toString());
+        if (dailyId == null) return false;
+        switch (dailyId){
+            case "nutrition": return log != null && log.isNutritionDailyAwarded();
+            case "english": return log != null && log.isEnglishDailyAwarded();
+            case "sport": return log != null && log.isSportAwarded();
+            case "yoga": return log != null && log.isYogaAwarded();
+            case "viet": return log != null && log.isVietWordsAwarded();
+            default:
+                if (dailyId.startsWith("g:")){
+                    var set = state.getAnna().getGenericDoneByDay()
+                            .getOrDefault(date.toString(), Collections.emptySet());
+                    return set.contains(dailyId.substring(2));
+                }
+                return false;
+        }
+    }
+
     private void addBalance(int delta){
         var u = state.getAnna();
         u.setBalance(Math.max(0, u.getBalance() + delta)); // баланс не уходит ниже 0
     }
 
+    private void addDailyWithRouletteBonus(String dailyId, int base){
+        int mult = isRouletteDailyToday(dailyId) ? 2 : 1;
+        addBalance(base * mult);
+    }
+
+    private boolean isRouletteDailyToday(String dailyId){
+        var u = state.getAnna();
+        var rs = u.getTodayRoulette();
+        var today = LocalDate.now(zone());
+        return rs != null
+                && today.equals(rs.getDate())
+                && rs.getEffect() == RouletteEffect.DAILY_X2
+                && dailyId.equals(rs.getDailyId());
+    }
+
+    private int effectiveCostToday(String itemId, int baseCost){
+        var rs = state.getAnna().getTodayRoulette();
+        if (rs == null || !LocalDate.now(zone()).equals(rs.getDate())) return baseCost;
+        if (itemId.equals(rs.getFreeShopId())) return 0;
+        if (itemId.equals(rs.getDiscountedShopId())) return Math.max(0, baseCost / 2);
+        return baseCost;
+    }
+
     // --- Public API used by controllers ---
     public synchronized Map<String,Object> status() throws IOException {
-        processWeekIfNeeded();
+        processDayBoundariesIfNeeded();
         var u = state.getAnna();
         var today = LocalDate.now(zone());
         var weekStart = TimeUtil.weekStartMonday(today);
@@ -219,21 +291,23 @@ public class StateService {
     }
 
     public synchronized void addNutritionMinutes(int minutes) throws IOException {
+        processDayBoundariesIfNeeded();
         var log = todayLog();
         log.setNutritionMinutes(log.getNutritionMinutes() + minutes);
         if (!log.isNutritionDailyAwarded() && log.getNutritionMinutes() >= 180){
-            addBalance(2);
+            addDailyWithRouletteBonus("nutrition", 2);
             log.setNutritionDailyAwarded(true);
         }
         save();
     }
 
     public synchronized void addEnglishMinutes(int minutes) throws IOException {
+        processDayBoundariesIfNeeded();
         var u = state.getAnna();
         var log = todayLog();
         log.setEnglishMinutes(log.getEnglishMinutes() + minutes);
         if (!log.isEnglishDailyAwarded() && log.getEnglishMinutes() >= 60){
-            addBalance(1);
+            addDailyWithRouletteBonus("english", 1);
             log.setEnglishDailyAwarded(true);
             // streak +7 каждый 7
             u.setEnglishStreak(u.getEnglishStreak()+1);
@@ -245,10 +319,11 @@ public class StateService {
     }
 
     public synchronized void checkSport() throws IOException {
+        processDayBoundariesIfNeeded();
         var u = state.getAnna();
         var log = todayLog();
         if (!log.isSportAwarded()){
-            addBalance(1);
+            addDailyWithRouletteBonus("sport", 1);
             log.setSportAwarded(true);
             u.setSportStreak(u.getSportStreak()+1);
             if (u.getSportStreak() % 7 == 0){
@@ -259,19 +334,21 @@ public class StateService {
     }
 
     public synchronized void checkYoga() throws IOException {
+        processDayBoundariesIfNeeded();
         var log = todayLog();
         if (!log.isYogaAwarded()){
-            addBalance(1);
+            addDailyWithRouletteBonus("yoga", 1);
             log.setYogaAwarded(true);
         }
         save();
     }
 
     public synchronized void checkVietWords() throws IOException {
+        processDayBoundariesIfNeeded();
         var u = state.getAnna();
         var log = todayLog();
         if (!log.isVietWordsAwarded()){
-            addBalance(1);
+            addDailyWithRouletteBonus("viet", 1);
             log.setVietWordsAwarded(true);
             u.setVietWordsStreak(u.getVietWordsStreak()+1);
             if (u.getVietWordsStreak() % 7 == 0){
@@ -287,11 +364,20 @@ public class StateService {
     }
 
     public synchronized boolean completeGoal(String id) throws IOException {
+        processDayBoundariesIfNeeded();
         for (var g : state.getGoals()){
             if (g.getId().equals(id)){
                 if (!g.isCompleted()){
                     g.setCompletedAt(LocalDateTime.now(zone()));
-                    addBalance(g.getReward());
+                    int reward = g.getReward();
+                    var rs = state.getAnna().getTodayRoulette();
+                    if (rs != null
+                            && LocalDate.now(zone()).equals(rs.getDate())
+                            && rs.getEffect() == RouletteEffect.GOAL_X2
+                            && g.getId().equals(rs.getGoalId())) {
+                        reward *= 2;
+                    }
+                    addBalance(reward);
                     save();
                     return true;
                 }
@@ -302,13 +388,15 @@ public class StateService {
     }
 
     public synchronized boolean purchase(String id) throws IOException {
+        processDayBoundariesIfNeeded();
         var u = state.getAnna();
         var opt = state.getShop().stream().filter(s -> s.getId().equals(id)).findFirst();
         if (opt.isEmpty()) return false;
         var item = opt.get();
-        if (u.getBalance() < item.getCost()) return false;
-        u.setBalance(u.getBalance() - item.getCost());
-        u.getPurchases().add(new Purchase(item.getId(), item.getTitle(), item.getCost(), LocalDateTime.now(zone())));
+        int cost = effectiveCostToday(item.getId(), item.getCost());
+        if (u.getBalance() < cost) return false;
+        u.setBalance(u.getBalance() - cost);
+        u.getPurchases().add(new Purchase(item.getId(), item.getTitle(), cost, LocalDateTime.now(zone())));
         save();
         return true;
     }
@@ -331,6 +419,7 @@ public class StateService {
     }
 
     public synchronized void checkGenericTask(String taskId) throws IOException {
+        processDayBoundariesIfNeeded();
         var u = state.getAnna();
         var todayKey = LocalDate.now(zone()).toString();
         var doneSet = u.getGenericDoneByDay().computeIfAbsent(todayKey, k -> new HashSet<>());
@@ -338,7 +427,7 @@ public class StateService {
         var defOpt = state.getGenericDaily().stream().filter(d -> d.getId().equals(taskId)).findFirst();
         if (defOpt.isEmpty()) return;
         var def = defOpt.get();
-        addBalance(def.getDailyReward());
+        addDailyWithRouletteBonus("g:" + def.getId(), def.getDailyReward());
         doneSet.add(taskId);
 
         if (def.isStreakEnabled()){
@@ -349,6 +438,159 @@ public class StateService {
             }
         }
         save();
+    }
+
+    public synchronized RouletteDTO getTodayRoulette() throws IOException {
+        processDayBoundariesIfNeeded();
+        var u = state.getAnna();
+        var today = LocalDate.now(zone());
+        if (u.getTodayRoulette() != null && today.equals(u.getTodayRoulette().getDate())) {
+            return toDTO(u.getTodayRoulette(), false, effectMessage(u.getTodayRoulette()));
+        }
+        var rs = new RouletteState();
+        rs.setDate(today);
+        return toDTO(rs, true, "Крути рулетку ✨");
+    }
+
+    public synchronized RouletteDTO spinRoulette() throws IOException {
+        processDayBoundariesIfNeeded();
+        var u = state.getAnna();
+        var today = LocalDate.now(zone());
+        if (u.getTodayRoulette() != null && today.equals(u.getTodayRoulette().getDate())) {
+            return toDTO(u.getTodayRoulette(), false, "Сегодня уже крутили 💫");
+        }
+        int roll = RNG.nextInt(100);
+        RouletteEffect eff;
+        if (roll < 40) eff = RouletteEffect.DAILY_X2;
+        else if (roll < 70) eff = RouletteEffect.GOAL_X2;
+        else if (roll < 80) eff = RouletteEffect.BONUS_POINTS;
+        else if (roll < 90) eff = RouletteEffect.SHOP_DISCOUNT_50;
+        else eff = RouletteEffect.SHOP_FREE_UNDER_100;
+
+        var rs = new RouletteState();
+        rs.setDate(today);
+        rs.setEffect(eff);
+
+        switch (eff){
+            case DAILY_X2 -> {
+                List<String> candid = new ArrayList<>();
+                Map<String,Integer> rewardById = new HashMap<>();
+                for (var f : FIXED){
+                    candid.add(f.id());
+                    rewardById.put(f.id(), f.reward());
+                }
+                for (var gd : state.getGenericDaily()){
+                    candid.add("g:" + gd.getId());
+                    rewardById.put("g:" + gd.getId(), gd.getDailyReward());
+                }
+                String pick = candid.get(RNG.nextInt(candid.size()));
+                rs.setDailyId(pick);
+                rs.setDailyBaseReward(rewardById.get(pick));
+            }
+            case GOAL_X2 -> {
+                var incomplete = state.getGoals().stream().filter(g -> g.getCompletedAt() == null).toList();
+                if (!incomplete.isEmpty()){
+                    var g = incomplete.get(RNG.nextInt(incomplete.size()));
+                    rs.setGoalId(g.getId());
+                } else {
+                    rs.setEffect(RouletteEffect.BONUS_POINTS);
+                    rs.setBonusPoints(1 + RNG.nextInt(5));
+                    addBalance(rs.getBonusPoints());
+                }
+            }
+            case BONUS_POINTS -> {
+                int pts = 1 + RNG.nextInt(5);
+                rs.setBonusPoints(pts);
+                addBalance(pts);
+            }
+            case SHOP_DISCOUNT_50 -> {
+                var items = state.getShop();
+                if (!items.isEmpty()){
+                    var it = items.get(RNG.nextInt(items.size()));
+                    rs.setDiscountedShopId(it.getId());
+                }
+            }
+            case SHOP_FREE_UNDER_100 -> {
+                var items = state.getShop().stream().filter(i -> i.getCost() < 100).toList();
+                if (!items.isEmpty()){
+                    var it = items.get(RNG.nextInt(items.size()));
+                    rs.setFreeShopId(it.getId());
+                } else {
+                    var all = state.getShop();
+                    if (!all.isEmpty()){
+                        var it = all.get(RNG.nextInt(all.size()));
+                        rs.setDiscountedShopId(it.getId());
+                        rs.setEffect(RouletteEffect.SHOP_DISCOUNT_50);
+                    }
+                }
+            }
+        }
+
+        u.setTodayRoulette(rs);
+        save();
+        return toDTO(rs, false, effectMessage(rs));
+    }
+
+    private RouletteDTO toDTO(RouletteState rs, boolean canSpin, String msg){
+        var dto = new RouletteDTO();
+        dto.date = rs.getDate().toString();
+        dto.effect = rs.getEffect();
+        dto.dailyId = rs.getDailyId();
+        dto.dailyBaseReward = rs.getDailyBaseReward();
+        dto.goalId = rs.getGoalId();
+        dto.bonusPoints = rs.getBonusPoints();
+        dto.discountedShopId = rs.getDiscountedShopId();
+        dto.freeShopId = rs.getFreeShopId();
+        dto.canSpin = canSpin;
+        dto.message = msg;
+        dto.nextSpinAt = rs.getDate().plusDays(1).atStartOfDay(zone()).toInstant().toString();
+        return dto;
+    }
+
+    private String effectMessage(RouletteState rs){
+        if (rs.getEffect() == null) return "";
+        return switch (rs.getEffect()) {
+            case DAILY_X2 -> "Сегодня дейлик \"" + prettyDaily(rs.getDailyId()) + "\" даёт x2, но штраф за пропуск (−" + rs.getDailyBaseReward() + ")!";
+            case GOAL_X2 -> "Сегодня цель x2: " + goalTitle(rs.getGoalId());
+            case BONUS_POINTS -> "Моментальный бонус: +" + rs.getBonusPoints();
+            case SHOP_DISCOUNT_50 -> "−50% на покупку: " + shopTitle(rs.getDiscountedShopId());
+            case SHOP_FREE_UNDER_100 -> "Бесплатно сегодня: " + shopTitle(rs.getFreeShopId());
+        };
+    }
+
+    private String prettyDaily(String id){
+        if (id == null) return "";
+        return switch (id){
+            case "nutrition" -> "Нутрициология";
+            case "english" -> "Английский";
+            case "sport" -> "Спорт";
+            case "yoga" -> "Йога";
+            case "viet" -> "5 вьет. слов";
+            default -> {
+                if (id.startsWith("g:")) yield genericTitle(id.substring(2));
+                yield id;
+            }
+        };
+    }
+
+    private String goalTitle(String goalId){
+        if (goalId == null) return "";
+        return state.getGoals().stream()
+                .filter(g -> g.getId().equals(goalId))
+                .findFirst().map(OneTimeGoal::getTitle).orElse(goalId);
+    }
+
+    private String shopTitle(String id){
+        if (id == null) return "";
+        return state.getShop().stream()
+                .filter(s -> s.getId().equals(id))
+                .findFirst().map(ShopItem::getTitle).orElse(id);
+    }
+
+    private String genericTitle(String gid){
+        return state.getGenericDaily().stream()
+                .filter(g -> g.getId().equals(gid))
+                .findFirst().map(GenericDailyTaskDef::getTitle).orElse(gid);
     }
 
     private Map<String, List<HistoryDTO.Item>> buildStreakBonusesFixed() {
@@ -441,7 +683,7 @@ public class StateService {
     }
 
     public synchronized HistoryDTO.DayHistory computeDayHistory(String dateStr) throws IOException {
-        processWeekIfNeeded(); // на всякий случай
+        processDayBoundariesIfNeeded(); // на всякий случай
 
         LocalDate date = LocalDate.parse(dateStr);
         var u = state.getAnna();
@@ -485,7 +727,7 @@ public class StateService {
     }
 
     public synchronized HistoryDTO.MonthHistory computeMonthHistory(int year, int month) throws IOException {
-        processWeekIfNeeded();
+        processDayBoundariesIfNeeded();
 
         LocalDate first = LocalDate.of(year, month, 1);
         LocalDate last = first.plusMonths(1).minusDays(1);

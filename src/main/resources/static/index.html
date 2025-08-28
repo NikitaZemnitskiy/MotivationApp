@@ -17,6 +17,7 @@
     <div class="ml-auto text-right">
       <div class="text-xs opacity-75">Текущая неделя с <span id="weekStart"></span></div>
       <div class="text-xs opacity-75">До конца недели: <span id="weekTimer"></span></div>
+      <button class="btn" onclick="openWheel()">Рулетка 🎡</button>
       <button class="btn" onclick="openHistory()">История</button>
     </div>
 
@@ -32,7 +33,7 @@
           <div class="p-3 bg-slate-800/60 rounded-xl">
             <div class="flex justify-between items-center">
               <div>
-                <div class="font-medium">Нутрициология 3 часа/день — +2</div>
+                <div class="font-medium">Нутрициология 3 часа/день — <span id="dailyReward-nutrition" class="reward">+2</span></div>
                 <div class="opacity-80">Сегодня: <span id="nutriMin">0</span>/180 минут</div>
               </div>
               <div class="flex gap-2">
@@ -48,7 +49,7 @@
           <div class="p-3 bg-slate-800/60 rounded-xl">
             <div class="flex justify-between items-center">
               <div>
-                <div class="font-medium">Английский 1 час — +1 (стрик +7/7)</div>
+                <div class="font-medium">Английский 1 час — <span id="dailyReward-english" class="reward">+1</span> (стрик +7/7)</div>
                 <div class="opacity-80">Сегодня: <span id="engMin">0</span>/60 минут</div>
               </div>
               <div class="flex gap-2">
@@ -64,7 +65,7 @@
           <!-- Спорт -->
           <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
             <div>
-              <div class="font-medium">Спорт — +1 (стрик +7/7)</div>
+              <div class="font-medium">Спорт — <span id="dailyReward-sport" class="reward">+1</span> (стрик +7/7)</div>
               <div class="text-xs opacity-80">Текущий стрик: <span id="sportStreak">0</span></div>
             </div>
             <button id="sportBtn" class="btn" onclick="post('/api/tasks/sport/check')">Сделано</button>
@@ -72,14 +73,14 @@
 
           <!-- Йога -->
           <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
-            <div><div class="font-medium">Йога — +1</div></div>
+            <div><div class="font-medium">Йога — <span id="dailyReward-yoga" class="reward">+1</span></div></div>
             <button id="yogaBtn" class="btn" onclick="post('/api/tasks/yoga/check')">Сделано</button>
           </div>
 
           <!-- Вьетнамские слова -->
           <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
             <div>
-              <div class="font-medium">1 вьетнамское слово !С приминением! — +1 (стрик +7/7)</div>
+              <div class="font-medium">1 вьетнамское слово !С приминением! — <span id="dailyReward-viet" class="reward">+1</span> (стрик +7/7)</div>
               <div class="text-xs opacity-80">Текущий стрик: <span id="vietStreak">0</span></div>
             </div>
             <button id="vietBtn" class="btn" onclick="post('/api/tasks/vietnamese/check')">Сделано</button>
@@ -152,6 +153,34 @@
   }
 
   .pill { padding:.15rem .5rem; border-radius:999px; font-size:.7rem; }
+
+  #wheel {
+    position: relative;
+    background:
+      conic-gradient(
+        #ec4899 0 40%,
+        #eab308 40% 70%,
+        #3b82f6 70% 80%,
+        #22c55e 80% 90%,
+        #f43f5e 90% 100%
+      ),
+      radial-gradient(circle at center, rgba(255,255,255,.05) 0 60%, rgba(0,0,0,.5) 61% 100%);
+    box-shadow: inset 0 0 30px rgba(0,0,0,.6), 0 0 15px rgba(236,72,153,.6);
+  }
+  #wheel .slice {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: 0 0;
+    transform: rotate(var(--rot)) translateY(-100px) rotate(calc(-1 * var(--rot)));
+    font-size: 1.5rem;
+    pointer-events: none;
+  }
+  .spin { animation: spin 1.8s cubic-bezier(.2,.8,.3,1.4) 1; }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(1620deg); }
+  }
 </style>
 
 <script>
@@ -196,9 +225,18 @@
     setTimeout(() => el.style.boxShadow = '', 180);
   }
 
+  function applyDailyX2(id, base){
+    const el = document.getElementById('dailyReward-' + id);
+    if (!el) return;
+    el.innerHTML = `<span class="line-through opacity-60">+${base}</span> <span class="text-pink-400 text-lg font-bold">+${base*2}</span>`;
+  }
+
   async function load(){
-    const data = await api('/api/me');
-    if (!data) return; // если редирект на /login уже сделан
+    const [data, roulette] = await Promise.all([
+      api('/api/me'),
+      api('/api/roulette/today')
+    ]);
+    if (!data || !roulette) return;
 
     $('#username').textContent = data.username;
     $('#avatar').src = data.avatarUrl || '/assets/avatar.png';
@@ -228,11 +266,17 @@
     const g = $('#goals'); g.innerHTML='';
     data.goals.forEach(goal => {
       const done = !!goal.completedAt;
+      let rewardHtml = `+${goal.reward}`;
+      let rewardClass = 'opacity-80';
+      if (roulette.effect === 'GOAL_X2' && roulette.goalId === goal.id){
+        rewardHtml = `<span class="line-through opacity-60">+${goal.reward}</span> <span class="text-pink-400 text-lg font-bold">+${goal.reward*2}</span>`;
+        rewardClass = '';
+      }
       const btn = done ? `<button class="btn done" disabled>Готово</button>`
-              : `<button class="btn" onclick="post('/api/goals/${goal.id}/complete')">Засчитать (+${goal.reward})</button>`;
+              : `<button class="btn" onclick="post('/api/goals/${goal.id}/complete')">Засчитать (${rewardHtml})</button>`;
       g.insertAdjacentHTML('beforeend', `
           <div class="p-3 bg-slate-800/60 rounded-xl flex items-center justify-between">
-            <div>${goal.title} — <span class="opacity-80">+${goal.reward}</span></div>
+            <div>${goal.title} — <span class="${rewardClass}">${rewardHtml}</span></div>
             ${btn}
           </div>
         `);
@@ -256,10 +300,14 @@
     (data.genericDaily || []).forEach(def => {
       const done = data.todayGenericDone && data.todayGenericDone[def.id];
       const streak = (data.genericStreaks && data.genericStreaks[def.id]) || 0;
+      let rewardHtml = `+${def.dailyReward}`;
+      if (roulette.effect === 'DAILY_X2' && roulette.dailyId === 'g:' + def.id){
+        rewardHtml = `<span class="line-through opacity-60">+${def.dailyReward}</span> <span class="text-pink-400 text-lg font-bold">+${def.dailyReward*2}</span>`;
+      }
       gd.insertAdjacentHTML('beforeend', `
           <div class="p-3 bg-slate-800/60 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-medium">${def.title} — +${def.dailyReward}${def.streakEnabled?' (стрик +7/7)':''}</div>
+              <div class="font-medium">${def.title} — ${rewardHtml}${def.streakEnabled?' (стрик +7/7)':''}</div>
               ${def.streakEnabled?`<div class="text-xs opacity-80">Стрик: ${streak}</div>`:''}
             </div>
             <button class="btn ${done?'done':''}" ${done?'disabled':''}
@@ -267,6 +315,13 @@
           </div>
         `);
     });
+
+    if (roulette.effect === 'DAILY_X2'){
+      const id = roulette.dailyId;
+      if (id && !id.startsWith('g:')){
+        applyDailyX2(id, roulette.dailyBaseReward);
+      }
+    }
 
     function tick(){
       $('#weekTimer').textContent = formatTimer(data.secondsUntilWeekEndEpoch);
@@ -378,8 +433,80 @@
     $('#histDayPanel').classList.remove('hidden');
   }
 
+  function openWheel(){
+    const m = document.getElementById('wheelModal');
+    m.classList.remove('hidden');
+    m.classList.add('flex');
+    loadWheel();
+  }
+  function closeWheel(){
+    const m = document.getElementById('wheelModal');
+    m.classList.add('hidden');
+    m.classList.remove('flex');
+    updateNextSpin(null);
+  }
+  async function loadWheel(){
+    const j = await api('/api/roulette/today');
+    if (!j) return;
+    document.getElementById('wheelMsg').textContent = j.message || '';
+    document.getElementById('spinBtn').disabled = !j.canSpin;
+    updateNextSpin(j.canSpin ? null : j.nextSpinAt);
+  }
+  async function spinWheel(){
+    const wheel = document.getElementById('wheel');
+    wheel.classList.remove('spin'); void wheel.offsetWidth; wheel.classList.add('spin');
+    const j = await api('/api/roulette/spin', {method:'POST'});
+    if (!j) return;
+    document.getElementById('wheelMsg').textContent = j.message || '';
+    document.getElementById('spinBtn').disabled = true;
+    updateNextSpin(j.nextSpinAt);
+    await load();
+  }
+
+  let wheelNextTimer;
+  function updateNextSpin(iso){
+    clearInterval(wheelNextTimer);
+    const el = document.getElementById('wheelNext');
+    if (!iso){ el.textContent = ''; return; }
+    function tick(){
+      const diff = new Date(iso) - new Date();
+      if (diff <= 0){ el.textContent = ''; clearInterval(wheelNextTimer); return; }
+      const h = Math.floor(diff/3600000);
+      const m = Math.floor(diff%3600000/60000);
+      const s = Math.floor(diff%60000/1000);
+      el.textContent = `Следующая рулетка через ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    tick();
+    wheelNextTimer = setInterval(tick, 1000);
+  }
+
   load();
 </script>
+<div id="wheelModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+  <div class="bg-slate-900 w-full max-w-md rounded-2xl shadow-xl p-4">
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-lg font-semibold">Рулетка</div>
+      <button class="btn" onclick="closeWheel()">Закрыть</button>
+    </div>
+    <div class="relative mx-auto my-3">
+      <div id="wheel" class="w-64 h-64 rounded-full border-4 border-pink-500/50 overflow-hidden">
+        <div class="slice" style="--rot:72deg">⚡</div>
+        <div class="slice" style="--rot:198deg">🌟</div>
+        <div class="slice" style="--rot:270deg">🎁</div>
+        <div class="slice" style="--rot:306deg">💰</div>
+        <div class="slice" style="--rot:342deg">🎉</div>
+      </div>
+  <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+    <div class="w-0 h-0 border-l-8 border-r-8 border-b-[18px] border-transparent border-b-amber-400 -mt-64"></div>
+  </div>
+</div>
+<div id="wheelMsg" class="text-sm text-center opacity-80 min-h-[2rem]"></div>
+<div class="flex justify-center gap-2 mt-3">
+  <button id="spinBtn" class="btn" onclick="spinWheel()">Крутить</button>
+</div>
+<div id="wheelNext" class="text-xs opacity-60 mt-3 text-center"></div>
+</div>
+</div>
 <!-- История: модальное окно -->
 <div id="histModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
   <div class="bg-slate-900 w-full max-w-3xl rounded-2xl shadow-xl p-4">

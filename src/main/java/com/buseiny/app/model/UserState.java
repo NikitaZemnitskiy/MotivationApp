@@ -23,6 +23,9 @@ public class UserState {
     // покупки и достижения
     private List<com.buseiny.app.model.Purchase> purchases = new ArrayList<>();
 
+    // результат рулетки на сегодня
+    private RouletteState todayRoulette;
+
     public String getUsername(){ return username; }
     public void setUsername(String username){ this.username=username; }
     public int getBalance(){ return balance; }
@@ -44,7 +47,6 @@ public class UserState {
     public List<Purchase> getPurchases(){ return purchases; }
     public void setPurchases(List<Purchase> purchases){ this.purchases=purchases; }
 
-    private java.util.Map<String, RouletteEffect> rouletteByDay = new java.util.HashMap<>();
-    public java.util.Map<String, RouletteEffect> getRouletteByDay() { return rouletteByDay; }
-    public void setRouletteByDay(java.util.Map<String, RouletteEffect> m){ this.rouletteByDay = m; }
+    public RouletteState getTodayRoulette() { return todayRoulette; }
+    public void setTodayRoulette(RouletteState todayRoulette) { this.todayRoulette = todayRoulette; }
 }
