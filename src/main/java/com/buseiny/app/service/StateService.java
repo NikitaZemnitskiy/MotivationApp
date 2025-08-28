@@ -543,6 +543,7 @@ public class StateService {
         dto.freeShopId = rs.getFreeShopId();
         dto.canSpin = canSpin;
         dto.message = msg;
+        dto.nextSpinAt = rs.getDate().plusDays(1).atStartOfDay(zone()).toInstant().toString();
         return dto;
     }
 

@@ -13,4 +13,5 @@ public class RouletteDTO {
     public String freeShopId;
     public boolean canSpin;
     public String message;
+    public String nextSpinAt;
 }
