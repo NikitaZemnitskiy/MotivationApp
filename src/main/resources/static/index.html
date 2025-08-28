@@ -33,7 +33,7 @@
           <div class="p-3 bg-slate-800/60 rounded-xl">
             <div class="flex justify-between items-center">
               <div>
-                <div class="font-medium">Нутрициология 3 часа/день — +2</div>
+                <div class="font-medium">Нутрициология 3 часа/день — <span id="dailyReward-nutrition" class="reward">+2</span></div>
                 <div class="opacity-80">Сегодня: <span id="nutriMin">0</span>/180 минут</div>
               </div>
               <div class="flex gap-2">
@@ -49,7 +49,7 @@
           <div class="p-3 bg-slate-800/60 rounded-xl">
             <div class="flex justify-between items-center">
               <div>
-                <div class="font-medium">Английский 1 час — +1 (стрик +7/7)</div>
+                <div class="font-medium">Английский 1 час — <span id="dailyReward-english" class="reward">+1</span> (стрик +7/7)</div>
                 <div class="opacity-80">Сегодня: <span id="engMin">0</span>/60 минут</div>
               </div>
               <div class="flex gap-2">
@@ -65,7 +65,7 @@
           <!-- Спорт -->
           <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
             <div>
-              <div class="font-medium">Спорт — +1 (стрик +7/7)</div>
+              <div class="font-medium">Спорт — <span id="dailyReward-sport" class="reward">+1</span> (стрик +7/7)</div>
               <div class="text-xs opacity-80">Текущий стрик: <span id="sportStreak">0</span></div>
             </div>
             <button id="sportBtn" class="btn" onclick="post('/api/tasks/sport/check')">Сделано</button>
@@ -73,14 +73,14 @@
 
           <!-- Йога -->
           <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
-            <div><div class="font-medium">Йога — +1</div></div>
+            <div><div class="font-medium">Йога — <span id="dailyReward-yoga" class="reward">+1</span></div></div>
             <button id="yogaBtn" class="btn" onclick="post('/api/tasks/yoga/check')">Сделано</button>
           </div>
 
           <!-- Вьетнамские слова -->
           <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
             <div>
-              <div class="font-medium">1 вьетнамское слово !С приминением! — +1 (стрик +7/7)</div>
+              <div class="font-medium">1 вьетнамское слово !С приминением! — <span id="dailyReward-viet" class="reward">+1</span> (стрик +7/7)</div>
               <div class="text-xs opacity-80">Текущий стрик: <span id="vietStreak">0</span></div>
             </div>
             <button id="vietBtn" class="btn" onclick="post('/api/tasks/vietnamese/check')">Сделано</button>
@@ -225,9 +225,18 @@
     setTimeout(() => el.style.boxShadow = '', 180);
   }
 
+  function applyDailyX2(id, base){
+    const el = document.getElementById('dailyReward-' + id);
+    if (!el) return;
+    el.innerHTML = `<span class="line-through opacity-60">+${base}</span> <span class="text-pink-400 text-lg font-bold">+${base*2}</span>`;
+  }
+
   async function load(){
-    const data = await api('/api/me');
-    if (!data) return; // если редирект на /login уже сделан
+    const [data, roulette] = await Promise.all([
+      api('/api/me'),
+      api('/api/roulette/today')
+    ]);
+    if (!data || !roulette) return;
 
     $('#username').textContent = data.username;
     $('#avatar').src = data.avatarUrl || '/assets/avatar.png';
@@ -257,11 +266,17 @@
     const g = $('#goals'); g.innerHTML='';
     data.goals.forEach(goal => {
       const done = !!goal.completedAt;
+      let rewardHtml = `+${goal.reward}`;
+      let rewardClass = 'opacity-80';
+      if (roulette.effect === 'GOAL_X2' && roulette.goalId === goal.id){
+        rewardHtml = `<span class="line-through opacity-60">+${goal.reward}</span> <span class="text-pink-400 text-lg font-bold">+${goal.reward*2}</span>`;
+        rewardClass = '';
+      }
       const btn = done ? `<button class="btn done" disabled>Готово</button>`
-              : `<button class="btn" onclick="post('/api/goals/${goal.id}/complete')">Засчитать (+${goal.reward})</button>`;
+              : `<button class="btn" onclick="post('/api/goals/${goal.id}/complete')">Засчитать (${rewardHtml})</button>`;
       g.insertAdjacentHTML('beforeend', `
           <div class="p-3 bg-slate-800/60 rounded-xl flex items-center justify-between">
-            <div>${goal.title} — <span class="opacity-80">+${goal.reward}</span></div>
+            <div>${goal.title} — <span class="${rewardClass}">${rewardHtml}</span></div>
             ${btn}
           </div>
         `);
@@ -285,10 +300,14 @@
     (data.genericDaily || []).forEach(def => {
       const done = data.todayGenericDone && data.todayGenericDone[def.id];
       const streak = (data.genericStreaks && data.genericStreaks[def.id]) || 0;
+      let rewardHtml = `+${def.dailyReward}`;
+      if (roulette.effect === 'DAILY_X2' && roulette.dailyId === 'g:' + def.id){
+        rewardHtml = `<span class="line-through opacity-60">+${def.dailyReward}</span> <span class="text-pink-400 text-lg font-bold">+${def.dailyReward*2}</span>`;
+      }
       gd.insertAdjacentHTML('beforeend', `
           <div class="p-3 bg-slate-800/60 rounded-xl flex items-center justify-between">
             <div>
-              <div class="font-medium">${def.title} — +${def.dailyReward}${def.streakEnabled?' (стрик +7/7)':''}</div>
+              <div class="font-medium">${def.title} — ${rewardHtml}${def.streakEnabled?' (стрик +7/7)':''}</div>
               ${def.streakEnabled?`<div class="text-xs opacity-80">Стрик: ${streak}</div>`:''}
             </div>
             <button class="btn ${done?'done':''}" ${done?'disabled':''}
@@ -296,6 +315,13 @@
           </div>
         `);
     });
+
+    if (roulette.effect === 'DAILY_X2'){
+      const id = roulette.dailyId;
+      if (id && !id.startsWith('g:')){
+        applyDailyX2(id, roulette.dailyBaseReward);
+      }
+    }
 
     function tick(){
       $('#weekTimer').textContent = formatTimer(data.secondsUntilWeekEndEpoch);
