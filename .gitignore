@@ -1,0 +1,17 @@
+# Maven
+/target/
+
+# IntelliJ
+*.iml
+.idea/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# OS files
+.DS_Store
+
+# App data
+/data/

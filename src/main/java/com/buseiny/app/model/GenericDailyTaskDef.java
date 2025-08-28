@@ -1,6 +1,9 @@
 package com.buseiny.app.model;
 
+import lombok.Data;
+
 // Простая админская ежедневная задача-чекбокс с опциональным стриком
+@Data
 public class GenericDailyTaskDef {
     private String id;
     private String title;
@@ -11,12 +14,4 @@ public class GenericDailyTaskDef {
     public GenericDailyTaskDef(String id, String title, int dailyReward, boolean streakEnabled){
         this.id=id; this.title=title; this.dailyReward=dailyReward; this.streakEnabled=streakEnabled;
     }
-    public String getId(){ return id; }
-    public void setId(String id){ this.id=id; }
-    public String getTitle(){ return title; }
-    public void setTitle(String title){ this.title=title; }
-    public int getDailyReward(){ return dailyReward; }
-    public void setDailyReward(int dailyReward){ this.dailyReward=dailyReward; }
-    public boolean isStreakEnabled(){ return streakEnabled; }
-    public void setStreakEnabled(boolean streakEnabled){ this.streakEnabled=streakEnabled; }
 }

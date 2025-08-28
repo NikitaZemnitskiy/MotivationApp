@@ -2,6 +2,9 @@ package com.buseiny.app.model;
 
 import java.util.*;
 
+import lombok.Data;
+
+@Data
 public class UserState {
     private String username; // "Anna"
     private int balance;
@@ -25,28 +28,4 @@ public class UserState {
 
     // результат рулетки на сегодня
     private RouletteState todayRoulette;
-
-    public String getUsername(){ return username; }
-    public void setUsername(String username){ this.username=username; }
-    public int getBalance(){ return balance; }
-    public void setBalance(int balance){ this.balance=balance; }
-    public String getAvatarUrl(){ return avatarUrl; }
-    public void setAvatarUrl(String avatarUrl){ this.avatarUrl=avatarUrl; }
-    public Map<String, DailyLog> getDaily(){ return daily; }
-    public void setDaily(Map<String, DailyLog> daily){ this.daily=daily; }
-    public int getSportStreak(){ return sportStreak; }
-    public void setSportStreak(int sportStreak){ this.sportStreak=sportStreak; }
-    public int getEnglishStreak(){ return englishStreak; }
-    public void setEnglishStreak(int englishStreak){ this.englishStreak=englishStreak; }
-    public int getVietWordsStreak(){ return vietWordsStreak; }
-    public void setVietWordsStreak(int vietWordsStreak){ this.vietWordsStreak=vietWordsStreak; }
-    public Map<String, Integer> getGenericStreaks(){ return genericStreaks; }
-    public void setGenericStreaks(Map<String,Integer> genericStreaks){ this.genericStreaks=genericStreaks; }
-    public Map<String, Set<String>> getGenericDoneByDay(){ return genericDoneByDay; }
-    public void setGenericDoneByDay(Map<String, Set<String>> v){ this.genericDoneByDay=v; }
-    public List<Purchase> getPurchases(){ return purchases; }
-    public void setPurchases(List<Purchase> purchases){ this.purchases=purchases; }
-
-    public RouletteState getTodayRoulette() { return todayRoulette; }
-    public void setTodayRoulette(RouletteState todayRoulette) { this.todayRoulette = todayRoulette; }
 }
