@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.List;
+import com.buseiny.app.model.Purchase;
 
 @RestController
 @RequestMapping("/api")
@@ -21,7 +23,7 @@ public class ApiController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me() throws IOException {
+    public ResponseEntity<Map<String, Object>> me() throws IOException {
         Map<String,Object> status = state.status();
         return ResponseEntity.ok(status);
     }
@@ -84,5 +86,10 @@ public class ApiController {
         boolean ok = state.purchase(id);
         if (!ok) return ResponseEntity.badRequest().body("not enough balance or not found");
         return ResponseEntity.ok(state.status());
+    }
+
+    @GetMapping("/purchases")
+    public ResponseEntity<List<Purchase>> purchases() throws IOException {
+        return ResponseEntity.ok(state.getPurchases());
     }
 }

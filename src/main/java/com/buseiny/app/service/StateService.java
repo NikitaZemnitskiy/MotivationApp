@@ -176,7 +176,9 @@ public class StateService {
                 && !rs.isDailyPenaltyApplied()) {
             var dailyDone = isDailyDone(rs.getDate(), rs.getDailyId());
             if (!dailyDone) {
-                addBalance(-Math.abs(rs.getDailyBaseReward()));
+                int pen = -Math.abs(rs.getDailyBaseReward());
+                addBalance(pen);
+                addHistory(today, "Штраф за пропуск: " + prettyDaily(rs.getDailyId()), pen);
             }
             rs.setDailyPenaltyApplied(true);
             save();
@@ -211,6 +213,9 @@ public class StateService {
     void addDailyWithRouletteBonus(String dailyId, int base){
         int mult = isRouletteDailyToday(dailyId) ? 2 : 1;
         addBalance(base * mult);
+        if (mult == 2) {
+            addHistory(LocalDate.now(zone()), "Рулетка бонус: " + prettyDaily(dailyId), base);
+        }
     }
 
     private boolean isRouletteDailyToday(String dailyId){
@@ -229,6 +234,33 @@ public class StateService {
         if (itemId.equals(rs.getFreeShopId())) return 0;
         if (itemId.equals(rs.getDiscountedShopId())) return Math.max(0, baseCost / 2);
         return baseCost;
+    }
+
+    void addHistory(LocalDate date, String label, int points){
+        var extras = state.getAnna().getHistoryExtras();
+        extras.computeIfAbsent(date.toString(), k -> new ArrayList<>())
+                .add(new HistoryDTO.Item(label, points));
+    }
+
+    private String prettyDaily(String id){
+        if (id == null) return "";
+        return switch (id) {
+            case "nutrition" -> "Нутрициология";
+            case "english" -> "Английский";
+            case "sport" -> "Спорт";
+            case "yoga" -> "Йога";
+            case "viet" -> "Вьетнамские слова";
+            default -> {
+                if (id.startsWith("g:")) {
+                    var gid = id.substring(2);
+                    var opt = state.getGenericDaily().stream()
+                            .filter(g -> g.id().equals(gid))
+                            .findFirst();
+                    yield opt.map(GenericDailyTaskDef::title).orElse(gid);
+                }
+                yield id;
+            }
+        };
     }
 
     // --- Public API used by controllers ---
@@ -303,6 +335,7 @@ public class StateService {
                             && rs.getEffect() == RouletteEffect.GOAL_X2
                             && g.id().equals(rs.getGoalId())) {
                         reward *= 2;
+                        addHistory(LocalDate.now(zone()), "Рулетка бонус: цель x2 " + g.title(), g.reward());
                     }
                     addBalance(reward);
                     save();
@@ -323,9 +356,17 @@ public class StateService {
         int cost = effectiveCostToday(item.id(), item.cost());
         if (u.getBalance() < cost) return false;
         u.setBalance(u.getBalance() - cost);
-        u.getPurchases().add(new Purchase(item.id(), item.title(), cost, LocalDateTime.now(zone())));
+        var when = LocalDateTime.now(zone());
+        u.getPurchases().add(new Purchase(item.id(), item.title(), cost, when));
         save();
         return true;
+    }
+
+    public synchronized List<Purchase> getPurchases() throws IOException {
+        processDayBoundariesIfNeeded();
+        var list = new ArrayList<>(state.getAnna().getPurchases());
+        list.sort(Comparator.comparing(Purchase::purchasedAt).reversed());
+        return list;
     }
 
     // --- Admin ---
@@ -468,6 +509,26 @@ public class StateService {
             }
         }
 
+        // Weekly nutrition result applied on this day
+        if (date.getDayOfWeek() == DayOfWeek.MONDAY) {
+            LocalDate prevWeekStart = date.minusWeeks(1);
+            if (!prevWeekStart.isBefore(firstFullWeekStart())) {
+                int minutes = sumNutritionMinutesForWeek(prevWeekStart);
+                if (minutes >= 1080) items.add(new HistoryDTO.Item("Недельный бонус", 14));
+                else items.add(new HistoryDTO.Item("Недельный штраф", -20));
+            }
+        }
+
+        // Purchases on this day
+        for (var p : u.getPurchases()) {
+            if (p.purchasedAt() != null && p.purchasedAt().toLocalDate().equals(date)) {
+                items.add(new HistoryDTO.Item("Покупка: " + p.titleSnapshot(), -p.costSnapshot()));
+            }
+        }
+
+        // Extra entries (roulette bonuses etc.)
+        items.addAll(u.getHistoryExtras().getOrDefault(dateStr, List.of()));
+
         int total = items.stream().mapToInt(HistoryDTO.Item::points).sum();
         return new HistoryDTO.DayHistory(dateStr, total, items);
     }
@@ -571,6 +632,7 @@ public class StateService {
         for (var p : u.getPurchases()) {
             if (p.purchasedAt() != null) dates.add(p.purchasedAt().toLocalDate());
         }
+        for (var k : u.getHistoryExtras().keySet()) dates.add(java.time.LocalDate.parse(k));
         if (dates.isEmpty()) { save(); return; }
 
         // Threshold for weekly calculation
@@ -642,6 +704,11 @@ public class StateService {
                 if (p.purchasedAt() != null && p.purchasedAt().toLocalDate().equals(d)) {
                     u.setBalance(Math.max(0, u.getBalance() - p.costSnapshot()));
                 }
+            }
+
+            // Extra roulette-related history entries
+            for (var extra : u.getHistoryExtras().getOrDefault(key, Collections.emptyList())) {
+                addBalance(extra.points());
             }
 
             // Apply weekly +14/-20 at the start of each new week (Monday)
