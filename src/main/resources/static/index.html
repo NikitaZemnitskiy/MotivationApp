@@ -19,6 +19,7 @@
       <div class="text-xs opacity-75">До конца недели: <span id="weekTimer"></span></div>
       <button class="btn" onclick="openWheel()">Рулетка 🎡</button>
       <button class="btn" onclick="openHistory()">История</button>
+      <button class="btn" onclick="openPurchases()">Покупки</button>
     </div>
 
   </header>
@@ -416,21 +417,46 @@
       wrap.innerHTML = `<div class="text-sm opacity-70">Ничего не заработано в этот день.</div>`;
     } else {
       d.items.forEach(it => {
+        const sign = it.points > 0 ? '+' : '';
         wrap.insertAdjacentHTML('beforeend', `
           <div class="p-2 rounded-lg bg-slate-800/60 border border-slate-700/50 flex justify-between">
             <div class="text-sm">${it.label}</div>
-            <div class="text-sm font-semibold">+${it.points}</div>
+            <div class="text-sm font-semibold">${sign}${it.points}</div>
           </div>
         `);
       });
       wrap.insertAdjacentHTML('beforeend', `
         <div class="mt-2 p-2 rounded-lg bg-slate-900/60 border border-slate-700/50 flex justify-between">
           <div class="text-sm font-semibold">Итого</div>
-          <div class="text-sm font-semibold">+${d.total}</div>
+          <div class="text-sm font-semibold">${d.total >= 0 ? '+' : ''}${d.total}</div>
         </div>
       `);
     }
     $('#histDayPanel').classList.remove('hidden');
+  }
+
+  async function openPurchases(){
+    const data = await api('/api/purchases');
+    const wrap = $('#purchList'); wrap.innerHTML = '';
+    if (!data || data.length === 0){
+      wrap.innerHTML = `<div class="text-sm opacity-70">Покупок пока нет.</div>`;
+    } else {
+      data.forEach(p => {
+        const dt = new Date(p.purchasedAt).toLocaleDateString('ru-RU', {day:'2-digit', month:'long', year:'numeric'});
+        wrap.insertAdjacentHTML('beforeend', `
+          <div class="p-2 rounded-lg bg-slate-800/60 border border-slate-700/50 flex justify-between">
+            <div class="text-sm">${p.titleSnapshot} <span class="opacity-60 text-xs">${dt}</span></div>
+            <div class="text-sm font-semibold">-${p.costSnapshot}</div>
+          </div>
+        `);
+      });
+    }
+    $('#purchModal').classList.remove('hidden');
+    $('#purchModal').classList.add('flex');
+  }
+  function closePurchases(){
+    $('#purchModal').classList.add('hidden');
+    $('#purchModal').classList.remove('flex');
   }
 
   function openWheel(){
@@ -533,6 +559,17 @@
       <div class="text-sm font-semibold mb-2">Детали: <span id="histDayLabel"></span></div>
       <div id="histDayList" class="space-y-1"></div>
     </div>
+  </div>
+</div>
+
+<!-- Покупки: модальное окно -->
+<div id="purchModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+  <div class="bg-slate-900 w-full max-w-md rounded-2xl shadow-xl p-4">
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-lg font-semibold">Покупки</div>
+      <button class="btn" onclick="closePurchases()">Закрыть</button>
+    </div>
+    <div id="purchList" class="space-y-1 max-h-[60vh] overflow-y-auto"></div>
   </div>
 </div>
 
