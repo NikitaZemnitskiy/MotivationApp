@@ -239,8 +239,50 @@ public class StateService {
     }
 
 
-    public synchronized void resetStreaksIfMissedYesterday(){
-        // Streaks reset when a day is missed. Minimal placeholder implementation.
+    public synchronized void resetStreaksIfMissedYesterday() throws IOException {
+        processDayBoundariesIfNeeded();
+        var u = getState().getAnna();
+        var zone = zone();
+        var today = LocalDate.now(zone);
+        var yesterday = today.minusDays(1);
+        var yLog = u.getDaily().get(yesterday.toString());
+
+        boolean changed = false;
+
+        if (yLog == null || !yLog.isSportAwarded()) {
+            if (u.getSportStreak() != 0) {
+                u.setSportStreak(0);
+                changed = true;
+            }
+        }
+        if (yLog == null || !yLog.isEnglishDailyAwarded()) {
+            if (u.getEnglishStreak() != 0) {
+                u.setEnglishStreak(0);
+                changed = true;
+            }
+        }
+        if (yLog == null || !yLog.isVietWordsAwarded()) {
+            if (u.getVietWordsStreak() != 0) {
+                u.setVietWordsStreak(0);
+                changed = true;
+            }
+        }
+
+        var doneSet = u.getGenericDoneByDay().getOrDefault(yesterday.toString(), Collections.emptySet());
+        var streaks = u.getGenericStreaks();
+        for (var def : getState().getGenericDaily()) {
+            if (def.streakEnabled() && !doneSet.contains(def.id())) {
+                if (streaks.getOrDefault(def.id(), 0) != 0) {
+                    streaks.put(def.id(), 0);
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed) {
+            save();
+            log.info("Streaks reset for missed tasks on {}", yesterday);
+        }
     }
 
     public synchronized boolean completeGoal(String id) throws IOException {
