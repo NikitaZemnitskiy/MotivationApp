@@ -234,6 +234,7 @@ public class StateService {
         map.put("genericDaily", getState().getGenericDaily());
         map.put("todayGenericDone", todayGenericDone);
         map.put("genericStreaks", genericStreaks);
+        map.put("gifts", u.getGifts());
         return map;
     }
 
@@ -291,6 +292,22 @@ public class StateService {
         return list;
     }
 
+    public synchronized boolean acceptGift(String id) throws IOException {
+        processDayBoundariesIfNeeded();
+        var u = getState().getAnna();
+        var it = u.getGifts().iterator();
+        while (it.hasNext()) {
+            var g = it.next();
+            if (g.id().equals(id)) {
+                addBalance(g.amount());
+                it.remove();
+                save();
+                return true;
+            }
+        }
+        return false;
+    }
+
     // --- Admin ---
     public synchronized List<ShopItem> setShop(List<ShopItem> items) throws IOException {
         getState().setShop(new ArrayList<>(items));
@@ -320,5 +337,12 @@ public class StateService {
         u.setBalance(Math.max(0, value));
         save();
         return u.getBalance();
+    }
+
+    public synchronized List<Gift> adminAddGift(String title, int amount) throws IOException {
+        var u = getState().getAnna();
+        u.getGifts().add(new Gift(UUID.randomUUID().toString(), title, amount));
+        save();
+        return u.getGifts();
     }
 }

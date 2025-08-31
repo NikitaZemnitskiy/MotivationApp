@@ -92,4 +92,12 @@ public class ApiController {
     public ResponseEntity<List<Purchase>> purchases() throws IOException {
         return ResponseEntity.ok(state.getPurchases());
     }
+
+    // --- Gifts ---
+    @PostMapping("/gifts/{id}/accept")
+    public ResponseEntity<?> acceptGift(@PathVariable("id") String id) throws IOException {
+        boolean ok = state.acceptGift(id);
+        if (!ok) return ResponseEntity.badRequest().body("not found");
+        return ResponseEntity.ok(state.status());
+    }
 }

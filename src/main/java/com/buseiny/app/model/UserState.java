@@ -30,6 +30,9 @@ public class UserState {
     // purchases and achievements
     private List<com.buseiny.app.model.Purchase> purchases = new ArrayList<>();
 
+    // pending gifts from admin
+    private List<Gift> gifts = new ArrayList<>();
+
     // roulette result for today
     private RouletteState todayRoulette;
 }
