@@ -3,7 +3,7 @@
   "lastProcessedWeekStart" : "2025-08-25",
   "anna" : {
     "username" : "Анечка",
-    "balance" : 1,
+    "balance" : 12,
     "avatarUrl" : "/assets/avatar.png",
     "daily" : {
       "2025-08-27" : {
@@ -16,7 +16,25 @@
         "vietWordsAwarded" : false
       },
       "2025-08-28" : {
-        "nutritionMinutes" : 90,
+        "nutritionMinutes" : 180,
+        "englishMinutes" : 15,
+        "nutritionDailyAwarded" : true,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-08-29" : {
+        "nutritionMinutes" : 60,
+        "englishMinutes" : 60,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : true,
+        "sportAwarded" : true,
+        "yogaAwarded" : true,
+        "vietWordsAwarded" : false
+      },
+      "2025-08-30" : {
+        "nutritionMinutes" : 15,
         "englishMinutes" : 15,
         "nutritionDailyAwarded" : false,
         "englishDailyAwarded" : false,
@@ -25,16 +43,29 @@
         "vietWordsAwarded" : false
       }
     },
-    "sportStreak" : 0,
-    "englishStreak" : 0,
+    "sportStreak" : 1,
+    "englishStreak" : 1,
     "vietWordsStreak" : 0,
     "genericStreaks" : {
-      "sleep-before-23" : 1
+      "sleep-before-23" : 3
     },
     "genericDoneByDay" : {
-      "2025-08-27" : [ "sleep-before-23" ]
+      "2025-08-27" : [ "sleep-before-23" ],
+      "2025-08-28" : [ "sleep-before-23" ],
+      "2025-08-29" : [ "sleep-before-23" ]
     },
-    "purchases" : [ ]
+    "purchases" : [ ],
+    "todayRoulette" : {
+      "date" : "2025-08-30",
+      "effect" : "BONUS_POINTS",
+      "dailyId" : null,
+      "dailyBaseReward" : null,
+      "dailyPenaltyApplied" : false,
+      "goalId" : null,
+      "bonusPoints" : 3,
+      "discountedShopId" : null,
+      "freeShopId" : null
+    }
   },
   "goals" : [ {
     "id" : "sunrise",
