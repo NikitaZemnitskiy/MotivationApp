@@ -3,7 +3,7 @@
   "lastProcessedWeekStart" : "2025-08-25",
   "anna" : {
     "username" : "Анечка",
-    "balance" : 12,
+    "balance" : 15,
     "avatarUrl" : "/assets/avatar.png",
     "daily" : {
       "2025-08-27" : {
@@ -35,34 +35,41 @@
       },
       "2025-08-30" : {
         "nutritionMinutes" : 15,
-        "englishMinutes" : 15,
+        "englishMinutes" : 60,
         "nutritionDailyAwarded" : false,
-        "englishDailyAwarded" : false,
+        "englishDailyAwarded" : true,
         "sportAwarded" : false,
-        "yogaAwarded" : false,
+        "yogaAwarded" : true,
         "vietWordsAwarded" : false
       }
     },
     "sportStreak" : 1,
-    "englishStreak" : 1,
+    "englishStreak" : 2,
     "vietWordsStreak" : 0,
     "genericStreaks" : {
-      "sleep-before-23" : 3
+      "sleep-before-23" : 4
     },
     "genericDoneByDay" : {
       "2025-08-27" : [ "sleep-before-23" ],
       "2025-08-28" : [ "sleep-before-23" ],
-      "2025-08-29" : [ "sleep-before-23" ]
+      "2025-08-29" : [ "sleep-before-23" ],
+      "2025-08-30" : [ "sleep-before-23" ]
     },
-    "purchases" : [ ],
+    "historyExtras" : { },
+    "purchases" : [ {
+      "shopItemId" : "coffee-sweet",
+      "titleSnapshot" : "Кофе от Никиты с конфетой и комплиментами",
+      "costSnapshot" : 0,
+      "purchasedAt" : "2025-08-30T15:01:02.2498671"
+    } ],
     "todayRoulette" : {
-      "date" : "2025-08-30",
-      "effect" : "BONUS_POINTS",
+      "date" : "2025-08-31",
+      "effect" : "GOAL_X2",
       "dailyId" : null,
       "dailyBaseReward" : null,
       "dailyPenaltyApplied" : false,
-      "goalId" : null,
-      "bonusPoints" : 3,
+      "goalId" : "sunrise",
+      "bonusPoints" : null,
       "discountedShopId" : null,
       "freeShopId" : null
     }
