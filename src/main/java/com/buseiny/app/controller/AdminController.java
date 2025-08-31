@@ -4,6 +4,7 @@ import com.buseiny.app.model.GenericDailyTaskDef;
 import com.buseiny.app.model.OneTimeGoal;
 import com.buseiny.app.model.ShopItem;
 import com.buseiny.app.service.StateService;
+import com.buseiny.app.service.HistoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +17,8 @@ import java.util.Map;
 public class AdminController {
 
     private final StateService state;
-    public AdminController(StateService state){ this.state = state; }
+    private final HistoryService history;
+    public AdminController(StateService state, HistoryService history){ this.state = state; this.history = history; }
 
     @PostMapping("/shop")
     public ResponseEntity<?> setShop(@RequestBody List<ShopItem> items) throws IOException {
@@ -36,12 +38,12 @@ public class AdminController {
     // History endpoints reuse common calculations
     @GetMapping("/history/month")
     public ResponseEntity<?> month(@RequestParam("year") int year, @RequestParam("month") int month) throws Exception {
-        return ResponseEntity.ok(state.computeMonthHistory(year, month));
+        return ResponseEntity.ok(history.computeMonthHistory(year, month));
     }
 
     @GetMapping("/history/day")
     public ResponseEntity<?> day(@RequestParam("date") String date) throws Exception {
-        return ResponseEntity.ok(state.computeDayHistory(date));
+        return ResponseEntity.ok(history.computeDayHistory(date));
     }
 
     // Adjust balance
@@ -60,7 +62,7 @@ public class AdminController {
     // Edit day and recalculate totals
     @PostMapping("/day/upsert")
     public ResponseEntity<?> upsertDay(@RequestBody com.buseiny.app.dto.AdminDayEditRequest req) throws Exception {
-        var result = state.adminUpsertDayAndRecalc(req);
+        var result = history.adminUpsertDayAndRecalc(req);
         return ResponseEntity.ok(result); // returns DayHistory and new balance
     }
 
