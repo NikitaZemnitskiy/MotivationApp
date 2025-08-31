@@ -66,5 +66,13 @@ public class AdminController {
         return ResponseEntity.ok(result); // returns DayHistory and new balance
     }
 
+    // Gifts
+    public record GiftRequest(String title, int amount) {}
+
+    @PostMapping("/gifts/add")
+    public ResponseEntity<?> addGift(@RequestBody GiftRequest req) throws IOException {
+        return ResponseEntity.ok(state.adminAddGift(req.title(), req.amount()));
+    }
+
 
 }

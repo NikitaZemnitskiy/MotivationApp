@@ -44,6 +44,15 @@
         </div>
       </div>
 
+      <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
+        <h2 class="font-semibold mb-3">Подарок</h2>
+        <input id="giftTitle" type="text" class="w-full p-2 mb-2 rounded bg-slate-800 border border-slate-700" placeholder="Описание">
+        <div class="flex gap-2 items-center">
+          <input id="giftAmount" type="number" class="w-32 p-2 rounded bg-slate-800 border border-slate-700" placeholder="Бусёины">
+          <button class="btn" onclick="addGift()">Добавить</button>
+        </div>
+      </div>
+
       <div class="bg-slate-900/70 p-4 rounded-2xl shadow md:col-span-2">
         <h2 class="font-semibold mb-3">Ежедневные (доп.) — простые чекбоксы</h2>
         <textarea id="dailyJson" class="w-full h-64 p-2 rounded bg-slate-800 font-mono text-xs"></textarea>
@@ -73,6 +82,16 @@
     async function saveShop(){ await api('/api/admin/shop', JSON.parse(document.querySelector('#shopJson').value)); alert('OK'); }
     async function saveGoals(){ await api('/api/admin/goals', JSON.parse(document.querySelector('#goalsJson').value)); alert('OK'); }
     async function saveDaily(){ await api('/api/admin/daily/generic', JSON.parse(document.querySelector('#dailyJson').value)); alert('OK'); }
+
+    async function addGift(){
+      const title = document.getElementById('giftTitle').value.trim();
+      const amount = parseInt(document.getElementById('giftAmount').value || '0', 10);
+      if (!title || !Number.isFinite(amount) || amount <= 0) return;
+      await api('/api/admin/gifts/add', {title, amount});
+      document.getElementById('giftTitle').value = '';
+      document.getElementById('giftAmount').value = '';
+      alert('OK');
+    }
 
 
     // ===== Баланс =====

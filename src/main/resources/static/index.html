@@ -20,6 +20,7 @@
       <button class="btn" onclick="window.location.href='wheel.html'">Рулетка 🎡</button>
       <button class="btn" onclick="openHistory()">История</button>
       <button class="btn" onclick="openPurchases()">Покупки</button>
+      <button id="giftBtn" class="btn" onclick="openGifts()">🎁</button>
     </div>
 
   </header>
@@ -221,6 +222,18 @@
     $('#vietStreak').textContent = data.vietStreak;
     $('#weekMin').textContent = data.weekNutritionMinutes;
     $('#weekStart').textContent = data.currentWeekStart;
+
+    const gifts = data.gifts || [];
+    const gbtn = document.getElementById('giftBtn');
+    if (gbtn){
+      if (gifts.length > 0){
+        gbtn.style.background = 'rgba(251,191,36,0.3)';
+        gbtn.style.borderColor = 'rgba(251,191,36,0.6)';
+      } else {
+        gbtn.style.background = '';
+        gbtn.style.borderColor = '';
+      }
+    }
 
     const pct = Math.min(100, Math.round(100*data.weekNutritionMinutes / data.weekGoalMinutes));
     $('#weekBar').style.width = pct + '%';
@@ -430,6 +443,35 @@
     $('#purchModal').classList.remove('flex');
   }
 
+  async function openGifts(){
+    const data = await api('/api/me');
+    const wrap = $('#giftsList'); wrap.innerHTML='';
+    const gifts = (data && data.gifts) || [];
+    if (gifts.length === 0){
+      wrap.innerHTML = `<div class="text-sm opacity-70">Подарков нет.</div>`;
+    } else {
+      gifts.forEach(g => {
+        wrap.insertAdjacentHTML('beforeend', `
+          <div class="p-2 rounded-lg bg-slate-800/60 border border-slate-700/50 flex justify-between items-center">
+            <div class="text-sm">${g.title} <span class="opacity-60 text-xs">+${g.amount}</span></div>
+            <button class="btn" onclick="acceptGift('${g.id}')">Принять</button>
+          </div>
+        `);
+      });
+    }
+    $('#giftsModal').classList.remove('hidden');
+    $('#giftsModal').classList.add('flex');
+  }
+  function closeGifts(){
+    $('#giftsModal').classList.add('hidden');
+    $('#giftsModal').classList.remove('flex');
+  }
+  async function acceptGift(id){
+    await api('/api/gifts/' + id + '/accept', {method:'POST'});
+    await load();
+    await openGifts();
+  }
+
   function openWheel(){
     const m = document.getElementById('wheelModal');
     m.classList.remove('hidden');
@@ -515,6 +557,17 @@
       <button class="btn" onclick="closePurchases()">Закрыть</button>
     </div>
     <div id="purchList" class="space-y-1 max-h-[60vh] overflow-y-auto"></div>
+  </div>
+</div>
+
+<!-- Подарки: модальное окно -->
+<div id="giftsModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+  <div class="bg-slate-900 w-full max-w-md rounded-2xl shadow-xl p-4">
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-lg font-semibold">Подарки</div>
+      <button class="btn" onclick="closeGifts()">Закрыть</button>
+    </div>
+    <div id="giftsList" class="space-y-1 max-h-[60vh] overflow-y-auto"></div>
   </div>
 </div>
 

@@ -57,6 +57,9 @@ public class StateRepository {
         if (state.getShop() == null || state.getShop().isEmpty()) {
             seedShop();
         }
+        if (state.getAnna().getGifts() == null) {
+            state.getAnna().setGifts(new ArrayList<>());
+        }
         save();
     }
 
@@ -69,6 +72,7 @@ public class StateRepository {
         u.setUsername("Anna");
         u.setBalance(0);
         u.setAvatarUrl("/assets/avatar.png");
+        u.setGifts(new ArrayList<>());
         s.setAnna(u);
         return s;
     }
