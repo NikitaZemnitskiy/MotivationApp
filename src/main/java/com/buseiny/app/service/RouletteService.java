@@ -84,12 +84,14 @@ public class RouletteService {
                     rs.setEffect(RouletteEffect.BONUS_POINTS);
                     rs.setBonusPoints(1 + ThreadLocalRandom.current().nextInt(5));
                     state.addBalance(rs.getBonusPoints());
+                    state.addHistory(LocalDate.now(state.zone()), "Рулетка бонус", rs.getBonusPoints());
                 }
             }
             case BONUS_POINTS -> {
                 int pts = 1 + ThreadLocalRandom.current().nextInt(5);
                 rs.setBonusPoints(pts);
                 state.addBalance(pts);
+                state.addHistory(LocalDate.now(state.zone()), "Рулетка бонус", pts);
             }
             case SHOP_DISCOUNT_50 -> {
                 var items = state.getState().getShop();
