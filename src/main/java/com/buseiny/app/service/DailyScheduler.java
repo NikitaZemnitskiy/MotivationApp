@@ -17,8 +17,8 @@ public class DailyScheduler {
     public DailyScheduler(StateService state) {
         this.state = state;
     }
-
-    @Scheduled(cron = "0 5 0 * * *", zone = "${app.timezone}")
+    //Every hour
+    @Scheduled(cron = "0 0 * * * *", zone = "${app.timezone}")
     public void dailyMaintenance() {
         try {
             state.resetStreaksIfMissedYesterday();

@@ -137,7 +137,7 @@ public class HistoryService {
             LocalDate prevWeekStart = date.minusWeeks(1);
             if (!prevWeekStart.isBefore(state.firstFullWeekStart())) {
                 int minutes = state.sumNutritionMinutesForWeek(prevWeekStart);
-                if (minutes >= 1080) items.add(new HistoryDTO.Item("Недельный бонус", 14));
+                if (minutes >= 960) items.add(new HistoryDTO.Item("Недельный бонус", 14));
                 else items.add(new HistoryDTO.Item("Недельный штраф", -20));
             }
         }
@@ -296,7 +296,7 @@ public class HistoryService {
                 LocalDate weekStart = TimeUtil.weekStartMonday(d);
                 if (!weekStart.isBefore(firstFullWeekStart)) {
                     int minutes = state.sumNutritionMinutesForWeek(weekStart);
-                    if (minutes >= 1080) state.addBalance(14);
+                    if (minutes >= 960) state.addBalance(14);
                     else state.addBalance(-20);
                 }
             }

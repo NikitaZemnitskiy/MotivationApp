@@ -1,9 +1,9 @@
 {
   "installedAt" : "2025-08-28T16:09:00.4429364",
-  "lastProcessedWeekStart" : "2025-08-25",
+  "lastProcessedWeekStart" : "2025-09-01",
   "anna" : {
     "username" : "Анечка",
-    "balance" : 15,
+    "balance" : 50,
     "avatarUrl" : "/assets/avatar.png",
     "daily" : {
       "2025-08-27" : {
@@ -41,34 +41,99 @@
         "sportAwarded" : false,
         "yogaAwarded" : true,
         "vietWordsAwarded" : false
+      },
+      "2025-08-31" : {
+        "nutritionMinutes" : 45,
+        "englishMinutes" : 15,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-01" : {
+        "nutritionMinutes" : 90,
+        "englishMinutes" : 30,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : true,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-02" : {
+        "nutritionMinutes" : 150,
+        "englishMinutes" : 15,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : true,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-03" : {
+        "nutritionMinutes" : 60,
+        "englishMinutes" : 60,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : true,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-04" : {
+        "nutritionMinutes" : 0,
+        "englishMinutes" : 0,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : true,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
       }
     },
     "sportStreak" : 1,
-    "englishStreak" : 2,
+    "englishStreak" : 0,
     "vietWordsStreak" : 0,
     "genericStreaks" : {
-      "sleep-before-23" : 4
+      "sleep-before-23" : 8,
+      "wake-at-8" : 1
     },
     "genericDoneByDay" : {
       "2025-08-27" : [ "sleep-before-23" ],
       "2025-08-28" : [ "sleep-before-23" ],
       "2025-08-29" : [ "sleep-before-23" ],
-      "2025-08-30" : [ "sleep-before-23" ]
+      "2025-08-30" : [ "sleep-before-23" ],
+      "2025-08-31" : [ "sleep-before-23" ],
+      "2025-09-01" : [ "wake-at-8", "sleep-before-23" ],
+      "2025-09-02" : [ "sleep-before-23" ],
+      "2025-09-03" : [ "sleep-before-23" ],
+      "2025-09-04" : [ "wake-at-8" ]
     },
-    "historyExtras" : { },
+    "historyExtras" : {
+      "2025-09-01" : [ {
+        "label" : "Рулетка бонус: Спорт",
+        "points" : 1
+      } ],
+      "2025-09-02" : [ {
+        "label" : "Рулетка бонус: Йога",
+        "points" : 1
+      } ],
+      "2025-09-03" : [ {
+        "label" : "Рулетка бонус",
+        "points" : 2
+      } ]
+    },
     "purchases" : [ {
-      "shopItemId" : "coffee-sweet",
-      "titleSnapshot" : "Кофе от Никиты с конфетой и комплиментами",
+      "shopItemId" : null,
+      "titleSnapshot" : null,
       "costSnapshot" : 0,
-      "purchasedAt" : "2025-08-30T15:01:02.2498671"
+      "purchasedAt" : null
     } ],
+    "gifts" : [ ],
     "todayRoulette" : {
-      "date" : "2025-08-31",
-      "effect" : "GOAL_X2",
-      "dailyId" : null,
-      "dailyBaseReward" : null,
+      "date" : "2025-09-04",
+      "effect" : "DAILY_X2",
+      "dailyId" : "sport",
+      "dailyBaseReward" : 1,
       "dailyPenaltyApplied" : false,
-      "goalId" : "sunrise",
+      "goalId" : null,
       "bonusPoints" : null,
       "discountedShopId" : null,
       "freeShopId" : null
@@ -77,9 +142,9 @@
   "goals" : [ {
     "id" : "sunrise",
     "title" : "Увидеть рассвет",
-    "reward" : 6,
-    "completedAt" : null,
-    "completed" : false
+    "reward" : 12,
+    "completedAt" : "2025-09-01T12:47:21.0946884",
+    "completed" : true
   }, {
     "id" : "meet-vn-girl",
     "title" : "Познакомиться с вьетнамкой",
@@ -90,6 +155,12 @@
     "id" : "date-vn-girl",
     "title" : "Встретиться с вьетнамкой",
     "reward" : 20,
+    "completedAt" : null,
+    "completed" : false
+  }, {
+    "id" : "yoga-class",
+    "title" : "Сходить на перввый урок по йоге",
+    "reward" : 5,
     "completedAt" : null,
     "completed" : false
   } ],
