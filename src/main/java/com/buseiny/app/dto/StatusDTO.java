@@ -3,9 +3,9 @@ package com.buseiny.app.dto;
 import com.buseiny.app.model.GenericDailyTaskDef;
 import com.buseiny.app.model.OneTimeGoal;
 import com.buseiny.app.model.ShopItem;
-
 import java.util.List;
 import java.util.Map;
+import com.buseiny.app.dto.WeeklyTaskDTO;
 
 /**
  * Snapshot of the current user status returned by API.
@@ -40,5 +40,6 @@ public record StatusDTO(
         List<GenericDailyTaskDef> genericDaily,
 
         Map<String, Boolean> todayGenericDone,
-        Map<String, Integer> genericStreaks
+        Map<String, Integer> genericStreaks,
+        List<WeeklyTaskDTO> weekDaily
 ) {}
