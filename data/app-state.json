@@ -3,7 +3,7 @@
   "lastProcessedWeekStart" : "2025-09-08",
   "anna" : {
     "username" : "Анечка",
-    "balance" : 125,
+    "balance" : 127,
     "avatarUrl" : "/assets/avatar.png",
     "daily" : {
       "2025-08-27" : {
@@ -169,9 +169,9 @@
         "vietWordsAwarded" : false
       },
       "2025-09-14" : {
-        "nutritionMinutes" : 30,
+        "nutritionMinutes" : 210,
         "englishMinutes" : 0,
-        "nutritionDailyAwarded" : false,
+        "nutritionDailyAwarded" : true,
         "englishDailyAwarded" : false,
         "sportAwarded" : true,
         "yogaAwarded" : false,
