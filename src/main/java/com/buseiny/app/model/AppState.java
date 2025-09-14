@@ -15,5 +15,6 @@ public class AppState {
 
     private List<OneTimeGoal> goals = new ArrayList<>();
     private List<ShopItem> shop = new ArrayList<>();
-    private List<GenericDailyTaskDef> genericDaily = new ArrayList<>();
+    // Unified daily task definitions loaded from state file
+    private List<DailyTaskDef> dailyTasks = new ArrayList<>();
 }

@@ -1,6 +1,8 @@
 package com.buseiny.app.repository;
 
 import com.buseiny.app.model.*;
+import com.buseiny.app.model.DailyTaskDef;
+import com.buseiny.app.model.DailyTaskKind;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -57,6 +59,9 @@ public class StateRepository {
         if (state.getShop() == null || state.getShop().isEmpty()) {
             seedShop();
         }
+        if (state.getDailyTasks() == null || state.getDailyTasks().isEmpty()) {
+            seedDailyTasksFromLegacy();
+        }
         if (state.getAnna().getGifts() == null) {
             state.getAnna().setGifts(new ArrayList<>());
         }
@@ -100,6 +105,32 @@ public class StateRepository {
                 new ShopItem("secret-gift", "Secret gift", 300)
         );
         state.setShop(new ArrayList<>(shop));
+    }
+
+    private void seedDailyTasksFromLegacy() {
+        List<DailyTaskDef> defs = new ArrayList<>();
+        defs.add(DailyTaskDef.create(
+                "nutrition", "Daily minutes #1", DailyTaskKind.MINUTES, 2,
+                180, 900, false, 1
+        ));
+        defs.add(DailyTaskDef.create(
+                "english", "Daily minutes #2", DailyTaskKind.MINUTES, 1,
+                60, null, true, 1
+        ));
+        defs.add(DailyTaskDef.create(
+                "sport", "Daily check #1", DailyTaskKind.CHECK, 1,
+                null, null, true, 1
+        ));
+        defs.add(DailyTaskDef.create(
+                "yoga", "Daily check #2", DailyTaskKind.CHECK, 1,
+                null, null, false, 1
+        ));
+        defs.add(DailyTaskDef.create(
+                "viet", "Daily check #3", DailyTaskKind.CHECK, 1,
+                null, null, true, 1
+        ));
+
+        state.setDailyTasks(defs);
     }
 
     public synchronized AppState get() { return state; }

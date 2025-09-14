@@ -28,46 +28,27 @@ public class ApiController {
         return ResponseEntity.ok(status);
     }
 
-    // --- Daily tasks ---
-    @PostMapping("/tasks/nutrition/add")
-    public ResponseEntity<?> addNutrition(@RequestParam("minutes") int minutes) throws IOException {
-        if (minutes != 15 && minutes != 30 && minutes != 60){
-            return ResponseEntity.badRequest().body("minutes must be 15|30|60");
-        }
-        daily.addNutritionMinutes(minutes);
-        return ResponseEntity.ok(state.status());
-    }
+    // --- Daily tasks (legacy endpoints kept) ---
+    // legacy endpoints removed
 
-    @PostMapping("/tasks/english/add")
-    public ResponseEntity<?> addEnglish(@RequestParam("minutes") int minutes) throws IOException {
-        if (minutes != 15 && minutes != 30 && minutes != 60){
-            return ResponseEntity.badRequest().body("minutes must be 15|30|60");
-        }
-        daily.addEnglishMinutes(minutes);
-        return ResponseEntity.ok(state.status());
-    }
-
-    @PostMapping("/tasks/sport/check")
-    public ResponseEntity<?> checkSport() throws IOException {
-        daily.checkSport();
-        return ResponseEntity.ok(state.status());
-    }
-
-    @PostMapping("/tasks/yoga/check")
-    public ResponseEntity<?> checkYoga() throws IOException {
-        daily.checkYoga();
-        return ResponseEntity.ok(state.status());
-    }
-
-    @PostMapping("/tasks/vietnamese/check")
-    public ResponseEntity<?> checkViet() throws IOException {
-        daily.checkVietWords();
-        return ResponseEntity.ok(state.status());
-    }
-
-    // generic daily (admin-defined simple check task)
+    // generic daily (unified id)
     @PostMapping("/tasks/generic/{id}/check")
     public ResponseEntity<?> checkGeneric(@PathVariable("id") String id) throws IOException {
+        daily.checkGenericTask(id);
+        return ResponseEntity.ok(state.status());
+    }
+
+    // Unified: add minutes to a minutes-type task
+    @PostMapping("/tasks/{id}/add")
+    public ResponseEntity<?> addMinutesGeneric(@PathVariable("id") String id, @RequestParam("minutes") int minutes) throws IOException {
+        if (minutes <= 0) return ResponseEntity.badRequest().body("minutes must be > 0");
+        daily.addMinutesByTaskId(id, minutes);
+        return ResponseEntity.ok(state.status());
+    }
+
+    // Unified: check a check-type task
+    @PostMapping("/tasks/{id}/check")
+    public ResponseEntity<?> checkGenericUnified(@PathVariable("id") String id) throws IOException {
         daily.checkGenericTask(id);
         return ResponseEntity.ok(state.status());
     }

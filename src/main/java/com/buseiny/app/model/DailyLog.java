@@ -4,11 +4,8 @@ import lombok.Data;
 
 @Data
 public class DailyLog {
-    private int nutritionMinutes;
-    private int englishMinutes;
-    private boolean nutritionDailyAwarded;
-    private boolean englishDailyAwarded;
-    private boolean sportAwarded;
-    private boolean yogaAwarded;
-    private boolean vietWordsAwarded;
+    private java.util.Map<String,Integer> minutes = new java.util.HashMap<>();
+    private java.util.Set<String> checks = new java.util.HashSet<>();
+    // For minutes-type tasks, track which were already awarded today
+    private java.util.Set<String> minutesAwarded = new java.util.HashSet<>();
 }

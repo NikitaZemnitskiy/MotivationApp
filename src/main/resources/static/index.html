@@ -29,67 +29,7 @@
     <div class="md:col-span-2 space-y-4">
       <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
         <h2 class="font-semibold mb-2">Ежедневные задания</h2>
-        <div class="space-y-3 text-sm">
-
-          <!-- Нутрициология -->
-          <div class="p-3 bg-slate-800/60 rounded-xl">
-            <div class="flex justify-between items-center">
-              <div>
-                <div class="font-medium">Нутрициология 3 часа/день — <span id="dailyReward-nutrition" class="reward">+2</span></div>
-                <div class="opacity-80">Сегодня: <span id="nutriMin">0</span>/180 минут</div>
-              </div>
-              <div class="flex gap-2">
-                <button id="nutri15" class="btn" onclick="add('nutrition',15)">+15</button>
-                <button id="nutri30" class="btn" onclick="add('nutrition',30)">+30</button>
-                <button id="nutri60" class="btn" onclick="add('nutrition',60)">+60</button>
-              </div>
-            </div>
-            <div id="nutriBadge" class="text-xs mt-1"></div>
-          </div>
-
-          <!-- Английский -->
-          <div class="p-3 bg-slate-800/60 rounded-xl">
-            <div class="flex justify-between items-center">
-              <div>
-                <div class="font-medium">Английский 1 час — <span id="dailyReward-english" class="reward">+1</span> (стрик +7/7)</div>
-                <div class="opacity-80">Сегодня: <span id="engMin">0</span>/60 минут</div>
-              </div>
-              <div class="flex gap-2">
-                <button id="eng15" class="btn" onclick="add('english',15)">+15</button>
-                <button id="eng30" class="btn" onclick="add('english',30)">+30</button>
-                <button id="eng60" class="btn" onclick="add('english',60)">+60</button>
-              </div>
-            </div>
-            <div class="text-xs mt-1 opacity-80">Текущий стрик: <span id="engStreak">0</span></div>
-            <div id="engBadge" class="text-xs mt-1"></div>
-          </div>
-
-          <!-- Спорт -->
-          <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
-            <div>
-              <div class="font-medium">Спорт — <span id="dailyReward-sport" class="reward">+1</span> (стрик +7/7)</div>
-              <div class="text-xs opacity-80">Текущий стрик: <span id="sportStreak">0</span></div>
-            </div>
-            <button id="sportBtn" class="btn" onclick="post('/api/tasks/sport/check')">Сделано</button>
-          </div>
-
-          <!-- Йога -->
-          <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
-            <div><div class="font-medium">Йога — <span id="dailyReward-yoga" class="reward">+1</span></div></div>
-            <button id="yogaBtn" class="btn" onclick="post('/api/tasks/yoga/check')">Сделано</button>
-          </div>
-
-          <!-- Вьетнамские слова -->
-          <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
-            <div>
-              <div class="font-medium">1 вьетнамское слово !С приминением! — <span id="dailyReward-viet" class="reward">+1</span> (стрик +7/7)</div>
-              <div class="text-xs opacity-80">Текущий стрик: <span id="vietStreak">0</span></div>
-            </div>
-            <button id="vietBtn" class="btn" onclick="post('/api/tasks/vietnamese/check')">Сделано</button>
-          </div>
-
-          <div id="genericDaily" class="space-y-2"></div>
-        </div>
+        <div id="tasks" class="space-y-3 text-sm"></div>
       </div>
 
       <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
@@ -101,7 +41,7 @@
     <div class="space-y-4">
       <div class="bg-slate-900/70 p-4 rounded-2xl shadow">
         <h2 class="font-semibold mb-2">Недельное обязательное</h2>
-        <div class="text-sm opacity-90">Нутрициология 14 часов/неделю</div>
+        <div class="text-sm opacity-90" id="weekGoalTitle"></div>
         <div class="w-full bg-slate-800 rounded-full h-3 my-2">
           <div id="weekBar" class="bg-pink-500 h-3 rounded-full" style="width:0%"></div>
         </div>
@@ -216,11 +156,6 @@
     $('#username').textContent = data.username;
     $('#avatar').src = data.avatarUrl || '/assets/avatar.png';
     $('#balance').textContent = data.balance;
-    $('#nutriMin').textContent = data.todayNutritionMinutes;
-    $('#engMin').textContent = data.todayEnglishMinutes;
-    $('#engStreak').textContent = data.englishStreak;
-    $('#sportStreak').textContent = data.sportStreak;
-    $('#vietStreak').textContent = data.vietStreak;
     $('#weekMin').textContent = data.weekNutritionMinutes;
     $('#weekStart').textContent = data.currentWeekStart;
 
@@ -251,16 +186,44 @@
       `);
     });
 
-    $('#nutriBadge').innerHTML = data.todayNutritionAwarded
-            ? '<span class="pill bg-emerald-600/40">Сегодня выполнено ✔</span>'
-            : '<span class="pill bg-slate-700/70">Нужно добрать до 180 минут</span>';
-    $('#engBadge').innerHTML = data.todayEnglishAwarded
-            ? '<span class="pill bg-emerald-600/40">Сегодня выполнено ✔</span>'
-            : '<span class="pill bg-slate-700/70">Нужно добрать до 60 минут</span>';
-
-    toggleBtn('sportBtn', !!data.todaySportDone);
-    toggleBtn('yogaBtn',  !!data.todayYogaDone);
-    toggleBtn('vietBtn',  !!data.todayVietDone);
+    // Render unified tasks
+    const tasksWrap = document.getElementById('tasks'); tasksWrap.innerHTML='';
+    (data.tasks||[]).forEach(t => {
+      let rewardHtml = `+${t.dailyReward}`;
+      if (roulette.effect === 'DAILY_X2' && roulette.dailyId === t.id){
+        rewardHtml = `<span class="line-through opacity-60">+${t.dailyReward}</span> <span class="text-pink-400 text-lg font-bold">+${t.dailyReward*2}</span>`;
+      }
+      if (t.kind === 'MINUTES'){
+        const cur = t.todayMinutes||0;
+        const need = t.minutesPerDay||0;
+        const done = !!t.todayDone;
+        tasksWrap.insertAdjacentHTML('beforeend', `
+          <div class="p-3 bg-slate-800/60 rounded-xl">
+            <div class="flex justify-between items-center">
+              <div>
+                <div class="font-medium">${t.title} — <span class="reward">${rewardHtml}</span>${t.streakEnabled?` (стрик +7/7)`:''}</div>
+                ${need?`<div class="opacity-80">Сегодня: <span>${cur}</span>/${need} минут</div>`:''}
+              </div>
+              <div class="flex gap-2">
+                <button class="btn" onclick="addGeneric('${t.id}',15)">+15</button>
+                <button class="btn" onclick="addGeneric('${t.id}',30)">+30</button>
+                <button class="btn" onclick="addGeneric('${t.id}',60)">+60</button>
+              </div>
+            </div>
+            <div class="text-xs mt-1">${done?'<span class="pill bg-emerald-600/40">Сегодня выполнено ✔</span>':''}</div>
+          </div>`);
+      } else {
+        const done = !!t.todayDone;
+        tasksWrap.insertAdjacentHTML('beforeend', `
+          <div class="p-3 bg-slate-800/60 rounded-xl flex justify-between">
+            <div>
+              <div class="font-medium">${t.title} — <span class="reward">${rewardHtml}</span>${t.streakEnabled?` (стрик +7/7)`:''}</div>
+              ${t.streakEnabled?`<div class="text-xs opacity-80">Стрик: ${t.streak||0}</div>`:''}
+            </div>
+            <button class="btn ${done?'done':''}" ${done?'disabled':''} onclick="post('/api/tasks/${t.id}/check')">${done?'Готово':'Сделано'}</button>
+          </div>`);
+      }
+    });
 
     const g = $('#goals'); g.innerHTML='';
     data.goals.forEach(goal => {
@@ -338,10 +301,8 @@
     await load();
   }
 
-  async function add(kind, m){
-    await api(`/api/tasks/${kind}/add?minutes=${m}`, {method:'POST'});
-    if (kind === 'nutrition') flash(document.getElementById('nutri30'));
-    if (kind === 'english')   flash(document.getElementById('eng30'));
+  async function addGeneric(id, m){
+    await api(`/api/tasks/${id}/add?minutes=${m}`, {method:'POST'});
     await load();
   }
   // === История / календарь ===

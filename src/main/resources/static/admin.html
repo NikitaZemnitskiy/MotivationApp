@@ -54,11 +54,11 @@
       </div>
 
       <div class="bg-slate-900/70 p-4 rounded-2xl shadow md:col-span-2">
-        <h2 class="font-semibold mb-3">Ежедневные (доп.) — простые чекбоксы</h2>
+        <h2 class="font-semibold mb-3">Ежедневные задания (унифицированные)</h2>
         <textarea id="dailyJson" class="w-full h-64 p-2 rounded bg-slate-800 font-mono text-xs"></textarea>
         <div class="mt-2 flex gap-2">
           <button class="btn" onclick="saveDaily()">Сохранить</button>
-          <span class="text-xs opacity-70">Массив объектов: {id,title,dailyReward,streakEnabled}</span>
+          <span class="text-xs opacity-70">Массив объектов: {id,title,kind:MINUTES|CHECK,dailyReward,minutesPerDay?,weeklyMinutesGoal?,streakEnabled,weeklyRequiredCount}</span>
         </div>
       </div>
     </section>
@@ -77,11 +77,11 @@
       const me = await fetch('/api/me', {headers:{'Authorization':authHeader}}).then(r=>r.json());
       document.querySelector('#shopJson').value = JSON.stringify(me.shop, null, 2);
       document.querySelector('#goalsJson').value = JSON.stringify(me.goals, null, 2);
-      document.querySelector('#dailyJson').value = JSON.stringify(me.genericDaily || [], null, 2);
+      document.querySelector('#dailyJson').value = JSON.stringify(me.tasks || [], null, 2);
     }
     async function saveShop(){ await api('/api/admin/shop', JSON.parse(document.querySelector('#shopJson').value)); alert('OK'); }
     async function saveGoals(){ await api('/api/admin/goals', JSON.parse(document.querySelector('#goalsJson').value)); alert('OK'); }
-    async function saveDaily(){ await api('/api/admin/daily/generic', JSON.parse(document.querySelector('#dailyJson').value)); alert('OK'); }
+    async function saveDaily(){ await api('/api/admin/daily', JSON.parse(document.querySelector('#dailyJson').value)); alert('OK'); }
 
     async function addGift(){
       const title = document.getElementById('giftTitle').value.trim();
