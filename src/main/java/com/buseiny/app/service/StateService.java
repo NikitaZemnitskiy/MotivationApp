@@ -4,6 +4,7 @@ import com.buseiny.app.dto.HistoryDTO;
 import com.buseiny.app.model.*;
 import com.buseiny.app.repository.StateRepository;
 import com.buseiny.app.util.TimeUtil;
+import com.buseiny.app.dto.WeeklyTaskDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,72 @@ public class StateService {
         return sum;
     }
 
+    private int countDailyForWeek(LocalDate weekStart, String dailyId){
+        LocalDate d = weekStart;
+        int cnt = 0;
+        for (int i=0;i<7;i++){
+            if (isDailyDone(d, dailyId)) cnt++;
+            d = d.plusDays(1);
+        }
+        return cnt;
+    }
+
+    private int weeklyRequirement(String dailyId){
+        return switch (dailyId){
+            case "nutrition", "english", "sport", "yoga", "viet" -> 1;
+            default -> {
+                if (dailyId.startsWith("g:")) {
+                    var gid = dailyId.substring(2);
+                    var opt = getState().getGenericDaily().stream()
+                            .filter(g -> g.id().equals(gid))
+                            .findFirst();
+                    yield opt.map(d -> d.weeklyMin() <= 0 ? 1 : d.weeklyMin()).orElse(1);
+                }
+                yield 1;
+            }
+        };
+    }
+
+    private int dailyRewardById(String dailyId){
+        return switch (dailyId){
+            case "nutrition" -> 2;
+            case "english" -> 1;
+            case "sport" -> 1;
+            case "yoga" -> 1;
+            case "viet" -> 1;
+            default -> {
+                if (dailyId.startsWith("g:")) {
+                    var gid = dailyId.substring(2);
+                    var opt = getState().getGenericDaily().stream()
+                            .filter(g -> g.id().equals(gid))
+                            .findFirst();
+                    yield opt.map(GenericDailyTaskDef::dailyReward).orElse(0);
+                }
+                yield 0;
+            }
+        };
+    }
+
+    private void applyWeeklyPenalties(LocalDate weekStart){
+        var today = LocalDate.now(zone());
+        List<String> ids = new ArrayList<>(List.of("nutrition","english","sport","yoga","viet"));
+        for (var def : getState().getGenericDaily()){
+            ids.add("g:" + def.id());
+        }
+        for (var id : ids){
+            int done = countDailyForWeek(weekStart, id);
+            int req = weeklyRequirement(id);
+            if (done < req){
+                int miss = req - done;
+                int pen = -5 * Math.abs(dailyRewardById(id)) * miss;
+                if (pen != 0){
+                    addBalance(pen);
+                    addHistory(today, "Штраф за неделю: " + prettyDaily(id), pen);
+                }
+            }
+        }
+    }
+
     LocalDate firstFullWeekStart(){
         var installed = getState().getInstalledAt().toLocalDate();
         return TimeUtil.firstMondayAfter(installed);
@@ -73,11 +140,12 @@ public class StateService {
             LocalDate weekStart = lastProcessed;
             if (!weekStart.isBefore(firstFullWeekStart())){
                 int minutes = sumNutritionMinutesForWeek(weekStart);
-                if (minutes >= 960){ // 16*60
+                if (minutes >= 900){ // 16*60
                     addBalance(14);
                 } else {
                     addBalance(-20);
                 }
+                applyWeeklyPenalties(weekStart);
             }
             lastProcessed = lastProcessed.plusWeeks(1);
         }
@@ -226,7 +294,7 @@ public class StateService {
         map.put("vietStreak", u.getVietWordsStreak());
         map.put("englishStreak", u.getEnglishStreak());
         map.put("weekNutritionMinutes", weekMinutes);
-        map.put("weekGoalMinutes", 960);
+        map.put("weekGoalMinutes", 900);
         map.put("secondsUntilWeekEndEpoch", weekEndInstant.getEpochSecond());
         map.put("currentWeekStart", weekStart.toString());
         map.put("goals", getState().getGoals());
@@ -234,6 +302,15 @@ public class StateService {
         map.put("genericDaily", getState().getGenericDaily());
         map.put("todayGenericDone", todayGenericDone);
         map.put("genericStreaks", genericStreaks);
+        List<WeeklyTaskDTO> weekly = new ArrayList<>();
+        List.of("nutrition","english","sport","yoga","viet").forEach(id -> {
+            weekly.add(new WeeklyTaskDTO(id, prettyDaily(id), weeklyRequirement(id), countDailyForWeek(weekStart, id)));
+        });
+        for (var def : getState().getGenericDaily()){
+            String gid = "g:" + def.id();
+            weekly.add(new WeeklyTaskDTO(def.id(), def.title(), weeklyRequirement(gid), countDailyForWeek(weekStart, gid)));
+        }
+        map.put("weekDaily", weekly);
         map.put("gifts", u.getGifts());
         return map;
     }
