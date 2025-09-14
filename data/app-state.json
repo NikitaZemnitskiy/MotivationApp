@@ -3,7 +3,7 @@
   "lastProcessedWeekStart" : "2025-09-08",
   "anna" : {
     "username" : "Анечка",
-    "balance" : 94,
+    "balance" : 125,
     "avatarUrl" : "/assets/avatar.png",
     "daily" : {
       "2025-08-27" : {
@@ -115,11 +115,65 @@
         "vietWordsAwarded" : false
       },
       "2025-09-08" : {
-        "nutritionMinutes" : 45,
+        "nutritionMinutes" : 105,
         "englishMinutes" : 0,
         "nutritionDailyAwarded" : false,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-09" : {
+        "nutritionMinutes" : 105,
+        "englishMinutes" : 0,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-10" : {
+        "nutritionMinutes" : 75,
+        "englishMinutes" : 60,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : true,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-11" : {
+        "nutritionMinutes" : 120,
+        "englishMinutes" : 0,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-12" : {
+        "nutritionMinutes" : 105,
+        "englishMinutes" : 0,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-13" : {
+        "nutritionMinutes" : 90,
+        "englishMinutes" : 0,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : false,
+        "yogaAwarded" : false,
+        "vietWordsAwarded" : false
+      },
+      "2025-09-14" : {
+        "nutritionMinutes" : 30,
+        "englishMinutes" : 0,
+        "nutritionDailyAwarded" : false,
+        "englishDailyAwarded" : false,
+        "sportAwarded" : true,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       }
@@ -128,8 +182,8 @@
     "englishStreak" : 0,
     "vietWordsStreak" : 0,
     "genericStreaks" : {
-      "sleep-before-23" : 12,
-      "wake-at-8" : 0
+      "wake-at-8" : 0,
+      "sleep-before-23" : 18
     },
     "genericDoneByDay" : {
       "2025-08-27" : [ "sleep-before-23" ],
@@ -143,7 +197,14 @@
       "2025-09-04" : [ "wake-at-8", "sleep-before-23" ],
       "2025-09-05" : [ "sleep-before-23" ],
       "2025-09-06" : [ "sleep-before-23" ],
-      "2025-09-07" : [ "sleep-before-23" ]
+      "2025-09-07" : [ "sleep-before-23" ],
+      "2025-09-08" : [ "sleep-before-23" ],
+      "2025-09-09" : [ "sleep-before-23" ],
+      "2025-09-10" : [ "sleep-before-23" ],
+      "2025-09-11" : [ "wake-at-8", "sleep-before-23" ],
+      "2025-09-12" : [ "sleep-before-23" ],
+      "2025-09-13" : [ "sleep-before-23" ],
+      "2025-09-14" : [ "wake-at-8" ]
     },
     "historyExtras" : {
       "2025-09-01" : [ {
@@ -165,6 +226,10 @@
       "2025-09-07" : [ {
         "label" : "Рулетка бонус: Йога",
         "points" : 1
+      } ],
+      "2025-09-10" : [ {
+        "label" : "Рулетка бонус: Английский",
+        "points" : 1
       } ]
     },
     "purchases" : [ {
@@ -175,14 +240,14 @@
     } ],
     "gifts" : [ ],
     "todayRoulette" : {
-      "date" : "2025-09-08",
-      "effect" : "GOAL_X2",
+      "date" : "2025-09-14",
+      "effect" : "SHOP_DISCOUNT_50",
       "dailyId" : null,
       "dailyBaseReward" : null,
       "dailyPenaltyApplied" : false,
-      "goalId" : "yoga-class",
+      "goalId" : null,
       "bonusPoints" : null,
-      "discountedShopId" : null,
+      "discountedShopId" : "no-gadgets",
       "freeShopId" : null
     }
   },
@@ -266,16 +331,19 @@
     "id" : "sleep-before-23",
     "title" : "Лечь спать до 23:00",
     "dailyReward" : 1,
-    "streakEnabled" : true
+    "streakEnabled" : true,
+    "weeklyMin" : 1
   }, {
     "id" : "wake-at-8",
     "title" : "Проснуться в 8:00",
     "dailyReward" : 1,
-    "streakEnabled" : true
+    "streakEnabled" : true,
+    "weeklyMin" : 1
   }, {
     "id" : "minet",
     "title" : "Горловой минет 15 минут",
     "dailyReward" : 2,
-    "streakEnabled" : false
+    "streakEnabled" : false,
+    "weeklyMin" : 1
   } ]
 }

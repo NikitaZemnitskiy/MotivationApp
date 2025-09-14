@@ -21,7 +21,7 @@ All data is stored in `data/app-state.json` (path configured in `application.yml
 ## Features
 - Daily tasks (minute-based and checkboxes)
 - Streaks for sport, English and Vietnamese words
-- Weekly nutrition goal: 16 hours (960 minutes) gives +14, otherwise −20, applied after the first full week
+- Weekly nutrition goal: 14 hours (900 minutes) gives +14, otherwise −20, applied after the first full week
 - Shop for spending Buseiny points
 - One-time goals (achievements)
 - Weekly progress and countdown

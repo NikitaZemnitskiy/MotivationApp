@@ -140,7 +140,7 @@ public class StateService {
             LocalDate weekStart = lastProcessed;
             if (!weekStart.isBefore(firstFullWeekStart())){
                 int minutes = sumNutritionMinutesForWeek(weekStart);
-                if (minutes >= 960){ // 16*60
+                if (minutes >= 900){ // 16*60
                     addBalance(14);
                 } else {
                     addBalance(-20);
@@ -294,7 +294,7 @@ public class StateService {
         map.put("vietStreak", u.getVietWordsStreak());
         map.put("englishStreak", u.getEnglishStreak());
         map.put("weekNutritionMinutes", weekMinutes);
-        map.put("weekGoalMinutes", 960);
+        map.put("weekGoalMinutes", 900);
         map.put("secondsUntilWeekEndEpoch", weekEndInstant.getEpochSecond());
         map.put("currentWeekStart", weekStart.toString());
         map.put("goals", getState().getGoals());
