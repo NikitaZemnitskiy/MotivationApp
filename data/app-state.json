@@ -3,208 +3,894 @@
   "lastProcessedWeekStart" : "2025-09-08",
   "anna" : {
     "username" : "Анечка",
-    "balance" : 127,
+    "balance" : 125,
     "avatarUrl" : "/assets/avatar.png",
     "daily" : {
       "2025-08-27" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 150,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 150,
-        "englishMinutes" : 0,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 0,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-08-28" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 180,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 15,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 180,
-        "englishMinutes" : 15,
         "nutritionDailyAwarded" : true,
+        "englishMinutes" : 15,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-08-29" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 60,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : true,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 60,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : true,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 60,
-        "englishMinutes" : 60,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 60,
         "englishDailyAwarded" : true,
         "sportAwarded" : true,
         "yogaAwarded" : true,
         "vietWordsAwarded" : false
       },
       "2025-08-30" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 15,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : true,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 60,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 15,
-        "englishMinutes" : 60,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 60,
         "englishDailyAwarded" : true,
         "sportAwarded" : false,
         "yogaAwarded" : true,
         "vietWordsAwarded" : false
       },
       "2025-08-31" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 45,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 15,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 45,
-        "englishMinutes" : 15,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 15,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-01" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 90,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 30,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : true,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 90,
-        "englishMinutes" : 30,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 30,
         "englishDailyAwarded" : false,
         "sportAwarded" : true,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-02" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 150,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : true,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 15,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 150,
-        "englishMinutes" : 15,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 15,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : true,
         "vietWordsAwarded" : false
       },
       "2025-09-03" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 60,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 60,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 60,
-        "englishMinutes" : 60,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 60,
         "englishDailyAwarded" : true,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-04" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 165,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 60,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : true,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 165,
-        "englishMinutes" : 60,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 60,
         "englishDailyAwarded" : true,
         "sportAwarded" : true,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-05" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 150,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 45,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 150,
-        "englishMinutes" : 45,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 45,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-06" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 180,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 60,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 180,
-        "englishMinutes" : 60,
         "nutritionDailyAwarded" : true,
+        "englishMinutes" : 60,
         "englishDailyAwarded" : true,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-07" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 180,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : true,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 15,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 180,
-        "englishMinutes" : 15,
         "nutritionDailyAwarded" : true,
+        "englishMinutes" : 15,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : true,
         "vietWordsAwarded" : false
       },
       "2025-09-08" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 105,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 105,
-        "englishMinutes" : 0,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 0,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-09" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 105,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 105,
-        "englishMinutes" : 0,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 0,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-10" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 75,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 60,
+            "completed" : false,
+            "dailyAwarded" : true,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 75,
-        "englishMinutes" : 60,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 60,
         "englishDailyAwarded" : true,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-11" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 120,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 120,
-        "englishMinutes" : 0,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 0,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-12" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 105,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 105,
-        "englishMinutes" : 0,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 0,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-13" : {
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 90,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
         "nutritionMinutes" : 90,
-        "englishMinutes" : 0,
         "nutritionDailyAwarded" : false,
+        "englishMinutes" : 0,
         "englishDailyAwarded" : false,
         "sportAwarded" : false,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       },
       "2025-09-14" : {
-        "nutritionMinutes" : 210,
+        "activities" : {
+          "nutrition" : {
+            "activityId" : "nutrition",
+            "minutes" : 30,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "viet" : {
+            "activityId" : "viet",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "yoga" : {
+            "activityId" : "yoga",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "english" : {
+            "activityId" : "english",
+            "minutes" : 0,
+            "completed" : false,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          },
+          "sport" : {
+            "activityId" : "sport",
+            "minutes" : 0,
+            "completed" : true,
+            "dailyAwarded" : false,
+            "weeklyAwarded" : false
+          }
+        },
+        "nutritionMinutes" : 30,
+        "nutritionDailyAwarded" : false,
         "englishMinutes" : 0,
-        "nutritionDailyAwarded" : true,
         "englishDailyAwarded" : false,
         "sportAwarded" : true,
         "yogaAwarded" : false,
         "vietWordsAwarded" : false
       }
     },
-    "sportStreak" : 0,
-    "englishStreak" : 0,
-    "vietWordsStreak" : 0,
-    "genericStreaks" : {
+    "activity1Streak" : 0,
+    "activity2Streak" : 0,
+    "activity3Streak" : 0,
+    "activityStreaks" : {
+      "viet" : 0,
+      "english" : 0,
+      "sport" : 0,
+      "sleep-before-23" : 0,
       "wake-at-8" : 0,
-      "sleep-before-23" : 18
-    },
-    "genericDoneByDay" : {
-      "2025-08-27" : [ "sleep-before-23" ],
-      "2025-08-28" : [ "sleep-before-23" ],
-      "2025-08-29" : [ "sleep-before-23" ],
-      "2025-08-30" : [ "sleep-before-23" ],
-      "2025-08-31" : [ "sleep-before-23" ],
-      "2025-09-01" : [ "wake-at-8", "sleep-before-23" ],
-      "2025-09-02" : [ "sleep-before-23" ],
-      "2025-09-03" : [ "sleep-before-23" ],
-      "2025-09-04" : [ "wake-at-8", "sleep-before-23" ],
-      "2025-09-05" : [ "sleep-before-23" ],
-      "2025-09-06" : [ "sleep-before-23" ],
-      "2025-09-07" : [ "sleep-before-23" ],
-      "2025-09-08" : [ "sleep-before-23" ],
-      "2025-09-09" : [ "sleep-before-23" ],
-      "2025-09-10" : [ "sleep-before-23" ],
-      "2025-09-11" : [ "wake-at-8", "sleep-before-23" ],
-      "2025-09-12" : [ "sleep-before-23" ],
-      "2025-09-13" : [ "sleep-before-23" ],
-      "2025-09-14" : [ "wake-at-8" ]
+      "run" : 0
     },
     "historyExtras" : {
       "2025-09-01" : [ {
@@ -232,23 +918,16 @@
         "points" : 1
       } ]
     },
-    "purchases" : [ {
-      "shopItemId" : null,
-      "titleSnapshot" : null,
-      "costSnapshot" : 0,
-      "purchasedAt" : null
-    } ],
+    "achievements" : [ ],
     "gifts" : [ ],
     "todayRoulette" : {
       "date" : "2025-09-14",
-      "effect" : "SHOP_DISCOUNT_50",
+      "effect" : "DAILY_X2",
       "dailyId" : null,
       "dailyBaseReward" : null,
       "dailyPenaltyApplied" : false,
       "goalId" : null,
-      "bonusPoints" : null,
-      "discountedShopId" : "no-gadgets",
-      "freeShopId" : null
+      "bonusPoints" : null
     }
   },
   "goals" : [ {
@@ -282,68 +961,86 @@
     "completedAt" : null,
     "completed" : false
   } ],
-  "shop" : [ {
-    "id" : "lazy-day",
-    "title" : "День тюлень (без осуждения)",
-    "cost" : 100
+  "activities" : [ {
+    "id" : "nutrition",
+    "title" : "Нутрициология",
+    "type" : "TIME_BASED",
+    "dailyReward" : 2,
+    "streakEnabled" : false,
+    "dailyNormMinutes" : 180,
+    "weeklyNormMinutes" : 900,
+    "streakReward" : 7
   }, {
-    "id" : "walk",
-    "title" : "Прогулка на выбор",
-    "cost" : 20
-  }, {
-    "id" : "nikita-sport",
-    "title" : "Занятие спортом Никиты",
-    "cost" : 30
-  }, {
-    "id" : "nikita-shopping",
-    "title" : "Поездка на шопинг Никиты",
-    "cost" : 50
-  }, {
-    "id" : "coffee-out",
-    "title" : "Поход в кофейню (или кофе домой)",
-    "cost" : 30
-  }, {
-    "id" : "coffee-sweet",
-    "title" : "Кофе от Никиты с конфетой и комплиментами",
-    "cost" : 10
-  }, {
-    "id" : "day-trip",
-    "title" : "Поездка куда хочешь на целый день",
-    "cost" : 250
-  }, {
-    "id" : "movie-night",
-    "title" : "Вечер кино (с ужина и до сна)",
-    "cost" : 75
-  }, {
-    "id" : "no-gadgets",
-    "title" : "День без гаджетов только с любимкой",
-    "cost" : 200
-  }, {
-    "id" : "secret-gift",
-    "title" : "Секретный подарок",
-    "cost" : 300
-  }, {
-    "id" : "secret-good-gift",
-    "title" : "Секретный хороший подарок!",
-    "cost" : 600
-  } ],
-  "genericDaily" : [ {
-    "id" : "sleep-before-23",
-    "title" : "Лечь спать до 23:00",
+    "id" : "english",
+    "title" : "Английский",
+    "type" : "TIME_BASED",
     "dailyReward" : 1,
     "streakEnabled" : true,
-    "weeklyMin" : 1
+    "dailyNormMinutes" : 60,
+    "weeklyNormMinutes" : 420,
+    "streakReward" : 7
+  }, {
+    "id" : "sport",
+    "title" : "Спорт",
+    "type" : "CHECKBOX",
+    "dailyReward" : 1,
+    "streakEnabled" : true,
+    "dailyNormMinutes" : null,
+    "weeklyNormMinutes" : null,
+    "streakReward" : 7
+  }, {
+    "id" : "yoga",
+    "title" : "Йога",
+    "type" : "CHECKBOX",
+    "dailyReward" : 1,
+    "streakEnabled" : false,
+    "dailyNormMinutes" : null,
+    "weeklyNormMinutes" : null,
+    "streakReward" : 7
+  }, {
+    "id" : "viet",
+    "title" : "Вьетнамские слова",
+    "type" : "CHECKBOX",
+    "dailyReward" : 1,
+    "streakEnabled" : true,
+    "dailyNormMinutes" : null,
+    "weeklyNormMinutes" : null,
+    "streakReward" : 7
+  }, {
+    "id" : "sleep-before-23",
+    "title" : "Лечь спать до 23:00",
+    "type" : "CHECKBOX",
+    "dailyReward" : 1,
+    "streakEnabled" : true,
+    "dailyNormMinutes" : null,
+    "weeklyNormMinutes" : null,
+    "streakReward" : 7
   }, {
     "id" : "wake-at-8",
     "title" : "Проснуться в 8:00",
+    "type" : "CHECKBOX",
     "dailyReward" : 1,
     "streakEnabled" : true,
-    "weeklyMin" : 1
+    "dailyNormMinutes" : null,
+    "weeklyNormMinutes" : null,
+    "streakReward" : 7
   }, {
     "id" : "minet",
     "title" : "Горловой минет 15 минут",
+    "type" : "CHECKBOX",
     "dailyReward" : 2,
     "streakEnabled" : false,
-    "weeklyMin" : 1
+    "dailyNormMinutes" : null,
+    "weeklyNormMinutes" : null,
+    "streakReward" : 7
+  }, {
+    "id" : "run",
+    "title" : "Бег по пляжу",
+    "type" : "CHECKBOX",
+    "dailyReward" : 0,
+    "streakEnabled" : true,
+    "dailyNormMinutes" : null,
+    "weeklyNormMinutes" : null,
+    "streakReward" : 5
   } ]
 }
