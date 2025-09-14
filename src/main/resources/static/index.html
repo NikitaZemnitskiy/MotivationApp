@@ -45,7 +45,7 @@
         <div class="w-full bg-slate-800 rounded-full h-3 my-2">
           <div id="weekBar" class="bg-pink-500 h-3 rounded-full" style="width:0%"></div>
         </div>
-        <div class="text-xs opacity-80">Собрано: <span id="weekMin">0</span>/900 минут</div>
+        <div class="text-xs opacity-80">Собрано: <span id="weekMin">0</span>/<span id="weekGoal">0</span> минут</div>
         <p class="text-xs mt-2 opacity-60">
           По итогам недели: &ge;900 мин → +14, иначе −20. Штраф/награда срабатывают автоматически при переходе недели.
         </p>
@@ -171,8 +171,9 @@
       }
     }
 
-    const pct = Math.min(100, Math.round(100*data.weekNutritionMinutes / data.weekGoalMinutes));
+    const pct = Math.min(100, data.weekGoalMinutes ? Math.round(100*data.weekNutritionMinutes / data.weekGoalMinutes) : 0);
     $('#weekBar').style.width = pct + '%';
+    $('#weekGoal').textContent = data.weekGoalMinutes || 0;
     const wl = $('#weekDailyList'); wl.innerHTML='';
     (data.weekDaily || []).forEach(t => {
       const left = t.required - t.done;

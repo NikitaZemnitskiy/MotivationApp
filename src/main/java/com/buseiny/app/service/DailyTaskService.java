@@ -16,8 +16,6 @@ public class DailyTaskService {
         this.state = state;
     }
 
-    // legacy-specific helpers removed; use addMinutesByTaskId and checkGenericTask
-
     public synchronized void checkGenericTask(String taskId) throws IOException {
         checkGeneric(taskId, rewardFor(taskId), streakEnabled(taskId));
     }

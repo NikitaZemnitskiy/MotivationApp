@@ -1,7 +1,5 @@
 package com.buseiny.app.model;
 
-import java.time.LocalDateTime;
-
 public enum RouletteEffect {
     DAILY_X2,            // random daily task gives x2 reward today; penalty if missed
     GOAL_X2,             // random one-time goal gives x2 reward today

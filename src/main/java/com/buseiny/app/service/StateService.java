@@ -32,7 +32,6 @@ public class StateService {
         repo.save();
     }
 
-    // --- Helpers ---
     private String todayKey(){
         return LocalDate.now(zone()).toString();
     }
@@ -156,11 +155,26 @@ public class StateService {
         if (rs.getEffect() == RouletteEffect.DAILY_X2
                 && !today.equals(rs.getDate())
                 && !rs.isDailyPenaltyApplied()) {
-            var dailyDone = isDailyDone(rs.getDate(), rs.getDailyId());
-            if (!dailyDone) {
-                int pen = -Math.abs(rs.getDailyBaseReward());
+            String id = rs.getDailyId();
+            if (id == null) {
+                rs.setDailyPenaltyApplied(true);
+                save();
+                return;
+            }
+            if (id.startsWith("g:")) {
+                id = id.substring(2);
+                rs.setDailyId(id);
+            }
+            Integer base = rs.getDailyBaseReward();
+            if (base == null) {
+                base = dailyRewardById(id);
+                rs.setDailyBaseReward(base);
+            }
+            var dailyDone = isDailyDone(rs.getDate(), id);
+            if (!dailyDone && base != null && base != 0) {
+                int pen = -Math.abs(base);
                 addBalance(pen);
-                addHistory(today, "Штраф за пропуск: " + prettyDaily(rs.getDailyId()), pen);
+                addHistory(today, "Штраф за пропуск: " + prettyDaily(id), pen);
             }
             rs.setDailyPenaltyApplied(true);
             save();
@@ -173,14 +187,7 @@ public class StateService {
         var opt = getState().getDailyTasks().stream().filter(d -> d.id().equals(dailyId)).findFirst();
         if (opt.isEmpty()) return false;
         var def = opt.get();
-        if (log == null) {
-            // fall back to legacy maps for generic tasks
-            if (def.kind() == com.buseiny.app.model.DailyTaskKind.CHECK) {
-                var set = getState().getAnna().getGenericDoneByDay().getOrDefault(date.toString(), Collections.emptySet());
-                return set.contains(dailyId);
-            }
-            return false;
-        }
+        if (log == null) return false;
         if (def.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES) {
             Integer m = log.getMinutes().get(dailyId);
             return m != null && def.minutesPerDay() != null && m >= def.minutesPerDay();
