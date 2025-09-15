@@ -156,7 +156,7 @@
     $('#username').textContent = data.username;
     $('#avatar').src = data.avatarUrl || '/assets/avatar.png';
     $('#balance').textContent = data.balance;
-    $('#weekMin').textContent = data.weekNutritionMinutes;
+    $('#weekMin').textContent = data.weekMinutes;
     $('#weekStart').textContent = data.currentWeekStart;
 
     const gifts = data.gifts || [];
@@ -171,7 +171,7 @@
       }
     }
 
-    const pct = Math.min(100, data.weekGoalMinutes ? Math.round(100*data.weekNutritionMinutes / data.weekGoalMinutes) : 0);
+    const pct = Math.min(100, data.weekGoalMinutes ? Math.round(100*data.weekMinutes / data.weekGoalMinutes) : 0);
     $('#weekBar').style.width = pct + '%';
     $('#weekGoal').textContent = data.weekGoalMinutes || 0;
     const wl = $('#weekDailyList'); wl.innerHTML='';
@@ -187,9 +187,12 @@
       `);
     });
 
-    // Render unified tasks
+    // Render unified tasks (MINUTES first)
     const tasksWrap = document.getElementById('tasks'); tasksWrap.innerHTML='';
-    (data.tasks||[]).forEach(t => {
+    const allTasks = (data.tasks || []);
+    const orderedTasks = allTasks.filter(t => t.kind === 'MINUTES')
+      .concat(allTasks.filter(t => t.kind !== 'MINUTES'));
+    orderedTasks.forEach(t => {
       let rewardHtml = `+${t.dailyReward}`;
       if (roulette.effect === 'DAILY_X2' && roulette.dailyId === t.id){
         rewardHtml = `<span class="line-through opacity-60">+${t.dailyReward}</span> <span class="text-pink-400 text-lg font-bold">+${t.dailyReward*2}</span>`;
@@ -247,12 +250,13 @@
 
     const shop = $('#shop'); shop.innerHTML='';
     data.shop.forEach(item => {
-      const afford = data.balance >= item.cost;
+      const eff = (item.effectiveCost ?? item.cost);
+      const afford = data.balance >= eff;
       shop.insertAdjacentHTML('beforeend', `
             <div class="p-3 bg-slate-800/60 rounded-xl flex items-center justify-between">
               <div>${item.title}</div>
               <div class="flex items-center gap-2">
-                <div class="text-xs opacity-80">${item.cost}</div>
+                <div class="text-xs opacity-80">${eff !== item.cost ? `<span class='line-through opacity-60 mr-1'>${item.cost}</span> <span class='text-pink-400 font-semibold'>${eff}</span>` : `${item.cost}`}</div>
                 <button class="btn" ${afford?'':'disabled'} onclick="post('/api/shop/${item.id}/purchase')">Купить</button>
               </div>
             </div>
@@ -296,9 +300,7 @@
 
   async function post(url){
     await api(url, {method:'POST'});
-    if (url.includes('/sport/'))      flash(document.getElementById('sportBtn'));
-    if (url.includes('/yoga/'))       flash(document.getElementById('yogaBtn'));
-    if (url.includes('/vietnamese/')) flash(document.getElementById('vietBtn'));
+    // unified buttons are generic now
     await load();
   }
 
@@ -308,10 +310,18 @@
   }
   // === История / календарь ===
   let histYear, histMonth; // 1..12
-  function openHistory(){
-    const now = new Date();
-    histYear = now.getFullYear();
-    histMonth = now.getMonth()+1;
+  async function openHistory(){
+    // use server-side today (timezone-aware) from roulette API
+    try {
+      const r = await api('/api/roulette/today');
+      const d = r && r.date ? new Date(r.date) : new Date();
+      histYear = d.getFullYear();
+      histMonth = d.getMonth()+1;
+    } catch(e){
+      const now = new Date();
+      histYear = now.getFullYear();
+      histMonth = now.getMonth()+1;
+    }
     $('#histModal').classList.remove('hidden');
     $('#histModal').classList.add('flex');
     renderHistory();

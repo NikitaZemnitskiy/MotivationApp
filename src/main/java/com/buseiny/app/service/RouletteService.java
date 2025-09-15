@@ -63,12 +63,15 @@ public class RouletteService {
                 String pick = candid.get(ThreadLocalRandom.current().nextInt(candid.size()));
                 rs.setDailyId(pick);
                 rs.setDailyBaseReward(rewardById.get(pick));
+                // record zero-point history entry to reflect roulette effect selection
+                state.addHistory(today, "Рулетка эффект: DAILY_X2 — " + prettyDaily(pick), 0);
             }
             case GOAL_X2 -> {
                 var incomplete = state.getState().getGoals().stream().filter(g -> g.completedAt() == null).toList();
                 if (!incomplete.isEmpty()) {
                     var g = incomplete.get(ThreadLocalRandom.current().nextInt(incomplete.size()));
                     rs.setGoalId(g.id());
+                    state.addHistory(today, "Рулетка эффект: GOAL_X2 — " + goalTitle(g.id()), 0);
                 } else {
                     rs.setEffect(RouletteEffect.BONUS_POINTS);
                     rs.setBonusPoints(1 + ThreadLocalRandom.current().nextInt(5));
@@ -87,6 +90,7 @@ public class RouletteService {
                 if (!items.isEmpty()) {
                     var it = items.get(ThreadLocalRandom.current().nextInt(items.size()));
                     rs.setDiscountedShopId(it.id());
+                    state.addHistory(today, "Рулетка эффект: SHOP_DISCOUNT_50 — " + shopTitle(it.id()), 0);
                 }
             }
             case SHOP_FREE_UNDER_100 -> {
@@ -94,12 +98,14 @@ public class RouletteService {
                 if (!items.isEmpty()) {
                     var it = items.get(ThreadLocalRandom.current().nextInt(items.size()));
                     rs.setFreeShopId(it.id());
+                    state.addHistory(today, "Рулетка эффект: SHOP_FREE_UNDER_100 — " + shopTitle(it.id()), 0);
                 } else {
                     var all = state.getState().getShop();
                     if (!all.isEmpty()) {
                         var it = all.get(ThreadLocalRandom.current().nextInt(all.size()));
                         rs.setDiscountedShopId(it.id());
                         rs.setEffect(RouletteEffect.SHOP_DISCOUNT_50);
+                        state.addHistory(today, "Рулетка эффект: SHOP_DISCOUNT_50 — " + shopTitle(it.id()), 0);
                     }
                 }
             }

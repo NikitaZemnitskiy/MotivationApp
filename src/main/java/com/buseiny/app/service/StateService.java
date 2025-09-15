@@ -41,7 +41,7 @@ public class StateService {
         return daily.computeIfAbsent(todayKey(), k -> new DailyLog());
     }
 
-    int sumNutritionMinutesForWeek(LocalDate weekStart){
+    int sumWeeklyGoalMinutesForWeek(LocalDate weekStart){
         // Sums minutes for the first minutes-type task that has a weekly goal
         var minutesTaskOpt = getState().getDailyTasks().stream()
                 .filter(t -> t.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES && t.weeklyMinutesGoal() != null && t.weeklyMinutesGoal() > 0)
@@ -128,7 +128,7 @@ public class StateService {
                         .filter(t -> t.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES && t.weeklyMinutesGoal() != null && t.weeklyMinutesGoal() > 0)
                         .findFirst();
                 if (minutesTaskOpt.isPresent()){
-                    int minutes = sumNutritionMinutesForWeek(weekStart);
+                    int minutes = sumWeeklyGoalMinutesForWeek(weekStart);
                     int goal = minutesTaskOpt.get().weeklyMinutesGoal();
                     if (minutes >= goal){
                         addBalance(14);
@@ -234,6 +234,11 @@ public class StateService {
                 .add(new HistoryDTO.Item(label, points));
     }
 
+    public synchronized void addBalanceWithHistory(LocalDate date, String label, int delta){
+        addBalance(delta);
+        addHistory(date, label, delta);
+    }
+
     private String prettyDaily(String id){
         if (id == null) return "";
         return getState().getDailyTasks().stream()
@@ -278,13 +283,23 @@ public class StateService {
         map.put("username", u.getUsername());
         map.put("avatarUrl", u.getAvatarUrl());
         map.put("balance", u.getBalance());
-        map.put("weekNutritionMinutes", weekMinutes);
+        map.put("weekMinutes", weekMinutes);
         map.put("weekGoalMinutes", weekGoalMinutes == null ? 0 : weekGoalMinutes);
         map.put("secondsUntilWeekEndEpoch", weekEndInstant.getEpochSecond());
         map.put("currentWeekStart", weekStart.toString());
         map.put("goals", getState().getGoals());
-        map.put("shop", getState().getShop());
-        // Deprecated fields removed; using unified tasks only
+        // shop with effectiveCost (considering today's roulette discounts)
+        List<Map<String,Object>> shopList = new ArrayList<>();
+        for (var s : getState().getShop()){
+            Map<String,Object> it = new HashMap<>();
+            it.put("id", s.id());
+            it.put("title", s.title());
+            it.put("cost", s.cost());
+            it.put("effectiveCost", effectiveCostToday(s.id(), s.cost()));
+            shopList.add(it);
+        }
+        map.put("shop", shopList);
+        // Unified tasks list with today's state
         // Unified tasks list with today's state
         List<Map<String,Object>> tasks = new ArrayList<>();
         for (var def : getState().getDailyTasks()){
@@ -329,28 +344,19 @@ public class StateService {
 
         boolean changed = false;
 
-        if (yLog == null || !yLog.getChecks().contains("sport")) {
-            if (u.getStreaks().getOrDefault("sport", 0) != 0) { u.getStreaks().put("sport", 0); changed = true; }
-        }
-        if (yLog == null || !yLog.getMinutesAwarded().contains("english")) {
-            if (u.getStreaks().getOrDefault("english", 0) != 0) { u.getStreaks().put("english", 0); changed = true; }
-        }
-        if (yLog == null || !yLog.getChecks().contains("viet")) {
-            if (u.getStreaks().getOrDefault("viet", 0) != 0) { u.getStreaks().put("viet", 0); changed = true; }
-        }
-
         var streaks = u.getStreaks();
         for (var def : getState().getDailyTasks()) {
-            if (def.streakEnabled() && def.kind() == DailyTaskKind.CHECK && !List.of("sport","yoga","viet").contains(def.id())) {
-                boolean done = false;
-                if (yLog != null) done = yLog.getChecks().contains(def.id());
-                if (!done) {
-                    if (streaks.getOrDefault(def.id(), 0) != 0) {
-                        streaks.put(def.id(), 0);
-                        changed = true;
-                    }
+            if (!def.streakEnabled()) continue;
+            boolean done = false;
+            if (yLog != null) {
+                if (def.kind() == DailyTaskKind.MINUTES) {
+                    Integer m = yLog.getMinutes().get(def.id());
+                    done = m != null && def.minutesPerDay() != null && m >= def.minutesPerDay();
+                } else {
+                    done = yLog.getChecks().contains(def.id());
                 }
             }
+            if (!done && streaks.getOrDefault(def.id(), 0) != 0) { streaks.put(def.id(), 0); changed = true; }
         }
 
         if (changed) {
@@ -415,7 +421,7 @@ public class StateService {
         while (it.hasNext()) {
             var g = it.next();
             if (g.id().equals(id)) {
-                addBalance(g.amount());
+                addBalanceWithHistory(LocalDate.now(zone()), "Подарок: " + g.title(), g.amount());
                 it.remove();
                 save();
                 return true;
@@ -444,13 +450,19 @@ public class StateService {
     // ===== Admin: balance
     public synchronized int adminAddBalance(int delta) throws IOException {
         var u = getState().getAnna();
-        u.setBalance(Math.max(0, u.getBalance() + delta));
+        addBalanceWithHistory(LocalDate.now(zone()), "Админ: корректировка баланса", delta);
         save();
         return u.getBalance();
     }
     public synchronized int adminSetBalance(int value) throws IOException {
         var u = getState().getAnna();
-        u.setBalance(Math.max(0, value));
+        int old = u.getBalance();
+        int newValue = Math.max(0, value);
+        u.setBalance(newValue);
+        int delta = newValue - old;
+        if (delta != 0){
+            addHistory(LocalDate.now(zone()), "Админ: установка баланса", delta);
+        }
         save();
         return u.getBalance();
     }

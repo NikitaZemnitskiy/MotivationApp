@@ -86,52 +86,25 @@ public class StateRepository {
 
     private void seedGoals() {
         var goals = List.of(
-                new OneTimeGoal("sunrise", "See the sunrise", 6),
-                new OneTimeGoal("meet-vn-girl", "Meet a Vietnamese girl", 15),
-                new OneTimeGoal("date-vn-girl", "Date a Vietnamese girl", 20)
+                new OneTimeGoal("welcome", "Complete your first goal", 5)
         );
         state.setGoals(new ArrayList<>(goals));
     }
 
     private void seedShop() {
         var shop = List.of(
-                new ShopItem("lazy-day", "Lazy day (no judgment)", 100),
+                new ShopItem("break", "Rest day", 100),
                 new ShopItem("walk", "Walk of choice", 20),
-                new ShopItem("nikita-sport", "Nikita sports session", 30),
-                new ShopItem("nikita-shopping", "Shopping trip for Nikita", 50),
-                new ShopItem("coffee-out", "Coffee outing (or coffee at home)", 30),
-                new ShopItem("coffee-sweet", "Coffee from Nikita with candy and compliments", 10),
-                new ShopItem("day-trip", "Day trip anywhere you want", 250),
-                new ShopItem("movie-night", "Movie night (from dinner to bedtime)", 75),
-                new ShopItem("no-gadgets", "Gadget-free day with your loved one", 200),
-                new ShopItem("secret-gift", "Secret gift", 300)
+                new ShopItem("coffee", "Coffee time", 30)
         );
         state.setShop(new ArrayList<>(shop));
     }
 
     private void seedDailyTasksFromLegacy() {
         List<DailyTaskDef> defs = new ArrayList<>();
-        defs.add(DailyTaskDef.create(
-                "nutrition", "Daily minutes #1", DailyTaskKind.MINUTES, 2,
-                180, 900, false, 1
-        ));
-        defs.add(DailyTaskDef.create(
-                "english", "Daily minutes #2", DailyTaskKind.MINUTES, 1,
-                60, null, true, 1
-        ));
-        defs.add(DailyTaskDef.create(
-                "sport", "Daily check #1", DailyTaskKind.CHECK, 1,
-                null, null, true, 1
-        ));
-        defs.add(DailyTaskDef.create(
-                "yoga", "Daily check #2", DailyTaskKind.CHECK, 1,
-                null, null, false, 1
-        ));
-        defs.add(DailyTaskDef.create(
-                "viet", "Daily check #3", DailyTaskKind.CHECK, 1,
-                null, null, true, 1
-        ));
-
+        // Provide neutral placeholders; user should configure via admin
+        defs.add(DailyTaskDef.create("activity-1", "Daily minutes #1", DailyTaskKind.MINUTES, 1, 60, 420, true, 1));
+        defs.add(DailyTaskDef.create("activity-2", "Daily check #1", DailyTaskKind.CHECK, 1, null, null, true, 1));
         state.setDailyTasks(defs);
     }
 

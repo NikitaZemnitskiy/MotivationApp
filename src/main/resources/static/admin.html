@@ -159,7 +159,7 @@
 
       // Подгрузим текущее состояние дня из /api/me (daily map) и generic def
       const me = await fetch('/api/me').then(r=>r.json());
-      const log = (me && me.todayNutritionMinutes!==undefined) ? null : null; // не используется напрямую
+      // unified: no direct daily fields
       // Получим «сырой» daily из state не можем, поэтому восстановим эвристикой через /api/history/day + /api/me
 
       // Для формы:
@@ -169,9 +169,7 @@
       // Покажем чекбоксы по факту выполненности
       // Вычислим done-флаги из списка элементов (ищем по названиям)
       const has = (label) => (d.items||[]).some(it => it.label.startsWith(label));
-      document.getElementById('admSport').checked = has('Спорт');
-      document.getElementById('admYoga').checked  = has('Йога');
-      document.getElementById('admViet').checked  = has('5 вьетнамских слов');
+      // legacy-specific controls removed
 
       // Минуты оставим пустыми — админ введет нужное (0..).
       document.getElementById('admNutriMin').value = '';
@@ -206,19 +204,13 @@
     async function saveAdmDay(){
       const nutri = document.getElementById('admNutriMin').value;
       const eng   = document.getElementById('admEngMin').value;
-      const sport = document.getElementById('admSport').checked;
-      const yoga  = document.getElementById('admYoga').checked;
-      const viet  = document.getElementById('admViet').checked;
+      // unified checks are handled via generic list below
       const genIds = Array.from(document.querySelectorAll('#admGeneric input[type="checkbox"]'))
               .filter(x=>x.checked).map(x=>x.getAttribute('data-gid'));
 
       const body = {
         date: ADate,
-        nutritionMinutes: nutri==='' ? null : parseInt(nutri,10),
-        englishMinutes:   eng===''   ? null : parseInt(eng,10),
-        sportDone: sport,
-        yogaDone:  yoga,
-        vietDone:  viet,
+        // unified payload handled by /api/admin/day/upsert (new)
         genericDoneIds: genIds
       };
 

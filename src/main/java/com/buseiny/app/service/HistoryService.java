@@ -1,6 +1,5 @@
 package com.buseiny.app.service;
 
-import com.buseiny.app.dto.AdminDayEditRequest;
 import com.buseiny.app.dto.HistoryDTO;
 import com.buseiny.app.model.DailyLog;
 import lombok.extern.slf4j.Slf4j;
@@ -34,39 +33,30 @@ public class HistoryService {
         int streak = 0;
         for (LocalDate d : dates) {
             var log = daily.get(d.toString());
-            boolean done = log != null && log.getChecks().contains("sport");
+            boolean done = false; // unified: streak-specific labels moved below
             if (done) {
                 streak++;
-                if (streak % 7 == 0) {
-                    map.computeIfAbsent(d.toString(), k->new ArrayList<>())
-                            .add(new HistoryDTO.Item("Streak: Sport (7 days)", 7));
-                }
+                // unified: label handled generically below
             } else streak = 0;
         }
 
         streak = 0;
         for (LocalDate d : dates) {
             var log = daily.get(d.toString());
-            boolean done = log != null && log.getMinutesAwarded().contains("english");
+            boolean done = false;
             if (done) {
                 streak++;
-                if (streak % 7 == 0) {
-                    map.computeIfAbsent(d.toString(), k->new ArrayList<>())
-                            .add(new HistoryDTO.Item("Streak: English (7 days)", 7));
-                }
+                // unified
             } else streak = 0;
         }
 
         streak = 0;
         for (LocalDate d : dates) {
             var log = daily.get(d.toString());
-            boolean done = log != null && log.getChecks().contains("viet");
+            boolean done = false;
             if (done) {
                 streak++;
-                if (streak % 7 == 0) {
-                    map.computeIfAbsent(d.toString(), k->new ArrayList<>())
-                            .add(new HistoryDTO.Item("Streak: 5 Viet words (7 days)", 7));
-                }
+                // unified
             } else streak = 0;
         }
         return map;
@@ -78,11 +68,18 @@ public class HistoryService {
         List<LocalDate> dates = state.getState().getAnna().getDaily().keySet().stream().map(LocalDate::parse).sorted().toList();
 
         for (var def : state.getState().getDailyTasks()) {
-            if (def.kind() != com.buseiny.app.model.DailyTaskKind.CHECK) continue;
             int streak = 0;
             for (LocalDate d : dates) {
                 var log = state.getState().getAnna().getDaily().get(d.toString());
-                boolean done = log != null && log.getChecks().contains(def.id());
+                boolean done = false;
+                if (log != null) {
+                    if (def.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES) {
+                        Integer m = log.getMinutes().get(def.id());
+                        done = m != null && def.minutesPerDay() != null && m >= def.minutesPerDay();
+                    } else {
+                        done = log.getChecks().contains(def.id());
+                    }
+                }
                 if (done) {
                     map.computeIfAbsent(d.toString(), k->new ArrayList<>()).add(new HistoryDTO.Item("Daily: " + def.title(), def.dailyReward()));
                     if (def.streakEnabled()) {
@@ -145,7 +142,7 @@ public class HistoryService {
                         .findFirst();
                 if (minutesTaskOpt.isPresent()){
                     var t = minutesTaskOpt.get();
-                    int minutes = state.sumNutritionMinutesForWeek(prevWeekStart); // uses legacy method; adapted elsewhere
+                    int minutes = state.sumWeeklyGoalMinutesForWeek(prevWeekStart);
                     if (minutes >= t.weeklyMinutesGoal()) items.add(new HistoryDTO.Item("Недельный бонус", 14));
                     else items.add(new HistoryDTO.Item("Недельный штраф", -20));
                 }
@@ -229,7 +226,6 @@ public class HistoryService {
         LocalDate maxDate = LocalDate.now(state.zone());
 
         LocalDate d = minDate;
-        int sportStreak = 0, engStreak = 0, vietStreak = 0;
         Map<String,Integer> genericStreaks = new HashMap<>();
 
         while (!d.isAfter(maxDate)) {
@@ -247,41 +243,9 @@ public class HistoryService {
                 }
             }
 
-            boolean sportDone = log != null && log.getChecks().contains("sport");
-            if (sportDone) {
-                int s = u.getStreaks().getOrDefault("sport", 0) + 1;
-                u.getStreaks().put("sport", s);
-                if (s % 7 == 0) state.addBalance(7);
-            } else u.getStreaks().put("sport", 0);
+            // per-task streaks advanced generically below
 
-            boolean engDone = log != null && log.getMinutesAwarded().contains("english");
-            if (engDone) {
-                int s = u.getStreaks().getOrDefault("english", 0) + 1;
-                u.getStreaks().put("english", s);
-                if (s % 7 == 0) state.addBalance(7);
-            } else u.getStreaks().put("english", 0);
-
-            boolean vietDone = log != null && log.getChecks().contains("viet");
-            if (vietDone) {
-                int s = u.getStreaks().getOrDefault("viet", 0) + 1;
-                u.getStreaks().put("viet", s);
-                if (s % 7 == 0) state.addBalance(7);
-            } else u.getStreaks().put("viet", 0);
-
-            // Generic admin tasks (now unified as checks besides sport/yoga/viet)
-            for (var def : state.getState().getDailyTasks()){
-                if (def.kind() == com.buseiny.app.model.DailyTaskKind.CHECK
-                        && !List.of("sport","yoga","viet").contains(def.id())){
-                    boolean done = log != null && log.getChecks().contains(def.id());
-                    if (done){
-                        if (def.streakEnabled()){
-                            int s = u.getStreaks().getOrDefault(def.id(), 0) + 1;
-                            u.getStreaks().put(def.id(), s);
-                            if (s % 7 == 0) state.addBalance(7);
-                        }
-                    }
-                }
-            }
+            // Unified tasks streaks handled below
 
             for (var g : state.getState().getGoals()) {
                 if (g.completedAt() != null && g.completedAt().toLocalDate().equals(d)) {
@@ -308,7 +272,7 @@ public class HistoryService {
                             .findFirst();
                     if (minutesTaskOpt.isPresent()){
                         var t = minutesTaskOpt.get();
-                        int minutes = state.sumNutritionMinutesForWeek(weekStart);
+                        int minutes = state.sumWeeklyGoalMinutesForWeek(weekStart);
                         if (minutes >= t.weeklyMinutesGoal()) state.addBalance(14);
                         else state.addBalance(-20);
                     }
