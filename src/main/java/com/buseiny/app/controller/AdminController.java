@@ -1,10 +1,11 @@
 package com.buseiny.app.controller;
 
-import com.buseiny.app.model.GenericDailyTaskDef;
+import com.buseiny.app.model.DailyTaskDef;
 import com.buseiny.app.model.OneTimeGoal;
 import com.buseiny.app.model.ShopItem;
 import com.buseiny.app.service.StateService;
 import com.buseiny.app.service.HistoryService;
+import com.buseiny.app.dto.AdminDayUpsertNewRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,9 +31,9 @@ public class AdminController {
         return ResponseEntity.ok(state.setGoals(items));
     }
 
-    @PostMapping("/daily/generic")
-    public ResponseEntity<?> setGenericDaily(@RequestBody List<GenericDailyTaskDef> items) throws IOException {
-        return ResponseEntity.ok(state.setGenericDaily(items));
+    @PostMapping("/daily")
+    public ResponseEntity<?> setDailyTasks(@RequestBody List<DailyTaskDef> items) throws IOException {
+        return ResponseEntity.ok(state.setDailyTasks(items));
     }
 
     // History endpoints reuse common calculations
@@ -61,9 +62,9 @@ public class AdminController {
 
     // Edit day and recalculate totals
     @PostMapping("/day/upsert")
-    public ResponseEntity<?> upsertDay(@RequestBody com.buseiny.app.dto.AdminDayEditRequest req) throws Exception {
-        var result = history.adminUpsertDayAndRecalc(req);
-        return ResponseEntity.ok(result); // returns DayHistory and new balance
+    public ResponseEntity<?> upsertDay(@RequestBody AdminDayUpsertNewRequest req) throws Exception {
+        var result = history.adminUpsertDayAndRecalcNew(req);
+        return ResponseEntity.ok(result);
     }
 
     // Gifts

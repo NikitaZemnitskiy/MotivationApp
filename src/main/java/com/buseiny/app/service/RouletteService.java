@@ -16,13 +16,6 @@ import java.util.function.Function;
 public class RouletteService {
     private final StateService state;
     private record FixedDaily(String id, int reward, Function<DailyLog, Boolean> isDone) {}
-    private static final List<FixedDaily> FIXED = List.of(
-            new FixedDaily("nutrition", 2, d -> d != null && d.isNutritionDailyAwarded()),
-            new FixedDaily("english", 1, d -> d != null && d.isEnglishDailyAwarded()),
-            new FixedDaily("sport", 1, d -> d != null && d.isSportAwarded()),
-            new FixedDaily("yoga", 1, d -> d != null && d.isYogaAwarded()),
-            new FixedDaily("viet", 1, d -> d != null && d.isVietWordsAwarded())
-    );
 
     public RouletteService(StateService state) {
         this.state = state;
@@ -63,23 +56,22 @@ public class RouletteService {
             case DAILY_X2 -> {
                 List<String> candid = new ArrayList<>();
                 Map<String, Integer> rewardById = new HashMap<>();
-                for (var f : FIXED) {
-                    candid.add(f.id());
-                    rewardById.put(f.id(), f.reward());
-                }
-                for (var gd : state.getState().getGenericDaily()) {
-                    candid.add("g:" + gd.id());
-                    rewardById.put("g:" + gd.id(), gd.dailyReward());
+                for (var def : state.getState().getDailyTasks()){
+                    candid.add(def.id());
+                    rewardById.put(def.id(), def.dailyReward());
                 }
                 String pick = candid.get(ThreadLocalRandom.current().nextInt(candid.size()));
                 rs.setDailyId(pick);
                 rs.setDailyBaseReward(rewardById.get(pick));
+                // record zero-point history entry to reflect roulette effect selection
+                state.addHistory(today, "Рулетка эффект: DAILY_X2 — " + prettyDaily(pick), 0);
             }
             case GOAL_X2 -> {
                 var incomplete = state.getState().getGoals().stream().filter(g -> g.completedAt() == null).toList();
                 if (!incomplete.isEmpty()) {
                     var g = incomplete.get(ThreadLocalRandom.current().nextInt(incomplete.size()));
                     rs.setGoalId(g.id());
+                    state.addHistory(today, "Рулетка эффект: GOAL_X2 — " + goalTitle(g.id()), 0);
                 } else {
                     rs.setEffect(RouletteEffect.BONUS_POINTS);
                     rs.setBonusPoints(1 + ThreadLocalRandom.current().nextInt(5));
@@ -98,6 +90,7 @@ public class RouletteService {
                 if (!items.isEmpty()) {
                     var it = items.get(ThreadLocalRandom.current().nextInt(items.size()));
                     rs.setDiscountedShopId(it.id());
+                    state.addHistory(today, "Рулетка эффект: SHOP_DISCOUNT_50 — " + shopTitle(it.id()), 0);
                 }
             }
             case SHOP_FREE_UNDER_100 -> {
@@ -105,12 +98,14 @@ public class RouletteService {
                 if (!items.isEmpty()) {
                     var it = items.get(ThreadLocalRandom.current().nextInt(items.size()));
                     rs.setFreeShopId(it.id());
+                    state.addHistory(today, "Рулетка эффект: SHOP_FREE_UNDER_100 — " + shopTitle(it.id()), 0);
                 } else {
                     var all = state.getState().getShop();
                     if (!all.isEmpty()) {
                         var it = all.get(ThreadLocalRandom.current().nextInt(all.size()));
                         rs.setDiscountedShopId(it.id());
                         rs.setEffect(RouletteEffect.SHOP_DISCOUNT_50);
+                        state.addHistory(today, "Рулетка эффект: SHOP_DISCOUNT_50 — " + shopTitle(it.id()), 0);
                     }
                 }
             }
@@ -151,17 +146,10 @@ public class RouletteService {
 
     private String prettyDaily(String id) {
         if (id == null) return "";
-        return switch (id) {
-            case "nutrition" -> "Nutrition";
-            case "english" -> "English";
-            case "sport" -> "Sport";
-            case "yoga" -> "Yoga";
-            case "viet" -> "5 Viet words";
-            default -> {
-                if (id.startsWith("g:")) yield genericTitle(id.substring(2));
-                yield id;
-            }
-        };
+        return state.getState().getDailyTasks().stream()
+                .filter(d -> d.id().equals(id))
+                .findFirst().map(com.buseiny.app.model.DailyTaskDef::title)
+                .orElse(id);
     }
 
     private String goalTitle(String goalId) {
@@ -179,8 +167,6 @@ public class RouletteService {
     }
 
     private String genericTitle(String gid) {
-        return state.getState().getGenericDaily().stream()
-                .filter(g -> g.id().equals(gid))
-                .findFirst().map(GenericDailyTaskDef::title).orElse(gid);
+        return gid;
     }
 }

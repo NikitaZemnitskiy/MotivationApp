@@ -19,13 +19,12 @@ Swagger UI is available at `/swagger-ui.html` after start.
 All data is stored in `data/app-state.json` (path configured in `application.yml`). The file is created automatically on first launch.
 
 ## Features
-- Daily tasks (minute-based and checkboxes)
-- Streaks for sport, English and Vietnamese words
-- Weekly nutrition goal: 14 hours (900 minutes) gives +14, otherwise −20, applied after the first full week
-- Shop for spending Buseiny points
-- One-time goals (achievements)
+- Daily tasks (MINUTES and CHECK kinds) defined in `dailyTasks`
+- Streaks for any task with `streakEnabled`
+- Weekly minutes goal from the first MINUTES task with `weeklyMinutesGoal`
+- Shop and one-time goals
 - Weekly progress and countdown
-- Roles: USER marks tasks, ADMIN manages shop/goals and can add generic daily tasks with optional streaks
+- Roles: USER marks tasks, ADMIN manages shop/goals/dailyTasks via JSON
 
 ## Build JAR
 ```bash

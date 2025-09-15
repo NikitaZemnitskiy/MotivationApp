@@ -1,9 +1,12 @@
 package com.buseiny.app.repository;
 
 import com.buseiny.app.model.*;
+import com.buseiny.app.model.DailyTaskDef;
+import com.buseiny.app.model.DailyTaskKind;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +39,7 @@ public class StateRepository {
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     }
 
     @PostConstruct
@@ -56,6 +60,9 @@ public class StateRepository {
         }
         if (state.getShop() == null || state.getShop().isEmpty()) {
             seedShop();
+        }
+        if (state.getDailyTasks() == null || state.getDailyTasks().isEmpty()) {
+            seedDailyTasksFromLegacy();
         }
         if (state.getAnna().getGifts() == null) {
             state.getAnna().setGifts(new ArrayList<>());
@@ -79,27 +86,26 @@ public class StateRepository {
 
     private void seedGoals() {
         var goals = List.of(
-                new OneTimeGoal("sunrise", "See the sunrise", 6),
-                new OneTimeGoal("meet-vn-girl", "Meet a Vietnamese girl", 15),
-                new OneTimeGoal("date-vn-girl", "Date a Vietnamese girl", 20)
+                new OneTimeGoal("welcome", "Complete your first goal", 5)
         );
         state.setGoals(new ArrayList<>(goals));
     }
 
     private void seedShop() {
         var shop = List.of(
-                new ShopItem("lazy-day", "Lazy day (no judgment)", 100),
+                new ShopItem("break", "Rest day", 100),
                 new ShopItem("walk", "Walk of choice", 20),
-                new ShopItem("nikita-sport", "Nikita sports session", 30),
-                new ShopItem("nikita-shopping", "Shopping trip for Nikita", 50),
-                new ShopItem("coffee-out", "Coffee outing (or coffee at home)", 30),
-                new ShopItem("coffee-sweet", "Coffee from Nikita with candy and compliments", 10),
-                new ShopItem("day-trip", "Day trip anywhere you want", 250),
-                new ShopItem("movie-night", "Movie night (from dinner to bedtime)", 75),
-                new ShopItem("no-gadgets", "Gadget-free day with your loved one", 200),
-                new ShopItem("secret-gift", "Secret gift", 300)
+                new ShopItem("coffee", "Coffee time", 30)
         );
         state.setShop(new ArrayList<>(shop));
+    }
+
+    private void seedDailyTasksFromLegacy() {
+        List<DailyTaskDef> defs = new ArrayList<>();
+        // Provide neutral placeholders; user should configure via admin
+        defs.add(DailyTaskDef.create("activity-1", "Daily minutes #1", DailyTaskKind.MINUTES, 1, 60, 420, true, 1));
+        defs.add(DailyTaskDef.create("activity-2", "Daily check #1", DailyTaskKind.CHECK, 1, null, null, true, 1));
+        state.setDailyTasks(defs);
     }
 
     public synchronized AppState get() { return state; }

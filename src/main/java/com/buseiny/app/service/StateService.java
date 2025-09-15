@@ -32,7 +32,6 @@ public class StateService {
         repo.save();
     }
 
-    // --- Helpers ---
     private String todayKey(){
         return LocalDate.now(zone()).toString();
     }
@@ -42,13 +41,22 @@ public class StateService {
         return daily.computeIfAbsent(todayKey(), k -> new DailyLog());
     }
 
-    int sumNutritionMinutesForWeek(LocalDate weekStart){
+    int sumWeeklyGoalMinutesForWeek(LocalDate weekStart){
+        // Sums minutes for the first minutes-type task that has a weekly goal
+        var minutesTaskOpt = getState().getDailyTasks().stream()
+                .filter(t -> t.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES && t.weeklyMinutesGoal() != null && t.weeklyMinutesGoal() > 0)
+                .findFirst();
+        if (minutesTaskOpt.isEmpty()) return 0;
+        String taskId = minutesTaskOpt.get().id();
         LocalDate d = weekStart;
         int sum = 0;
         for (int i=0;i<7;i++){
             String key = d.toString();
             var log = getState().getAnna().getDaily().get(key);
-            if (log != null) sum += log.getNutritionMinutes();
+            if (log != null){
+                Integer m = log.getMinutes().get(taskId);
+                if (m != null) sum += m;
+            }
             d = d.plusDays(1);
         }
         return sum;
@@ -65,47 +73,24 @@ public class StateService {
     }
 
     private int weeklyRequirement(String dailyId){
-        return switch (dailyId){
-            case "nutrition", "english", "sport", "yoga", "viet" -> 1;
-            default -> {
-                if (dailyId.startsWith("g:")) {
-                    var gid = dailyId.substring(2);
-                    var opt = getState().getGenericDaily().stream()
-                            .filter(g -> g.id().equals(gid))
-                            .findFirst();
-                    yield opt.map(d -> d.weeklyMin() <= 0 ? 1 : d.weeklyMin()).orElse(1);
-                }
-                yield 1;
-            }
-        };
+        var opt = getState().getDailyTasks().stream()
+                .filter(d -> d.id().equals(dailyId))
+                .findFirst();
+        return opt.map(d -> d.weeklyRequiredCount() == null || d.weeklyRequiredCount() <= 0 ? 1 : d.weeklyRequiredCount()).orElse(1);
     }
 
     private int dailyRewardById(String dailyId){
-        return switch (dailyId){
-            case "nutrition" -> 2;
-            case "english" -> 1;
-            case "sport" -> 1;
-            case "yoga" -> 1;
-            case "viet" -> 1;
-            default -> {
-                if (dailyId.startsWith("g:")) {
-                    var gid = dailyId.substring(2);
-                    var opt = getState().getGenericDaily().stream()
-                            .filter(g -> g.id().equals(gid))
-                            .findFirst();
-                    yield opt.map(GenericDailyTaskDef::dailyReward).orElse(0);
-                }
-                yield 0;
-            }
-        };
+        return getState().getDailyTasks().stream()
+                .filter(d -> d.id().equals(dailyId))
+                .findFirst()
+                .map(com.buseiny.app.model.DailyTaskDef::dailyReward)
+                .orElse(0);
     }
 
     private void applyWeeklyPenalties(LocalDate weekStart){
         var today = LocalDate.now(zone());
-        List<String> ids = new ArrayList<>(List.of("nutrition","english","sport","yoga","viet"));
-        for (var def : getState().getGenericDaily()){
-            ids.add("g:" + def.id());
-        }
+        List<String> ids = new ArrayList<>();
+        for (var def : getState().getDailyTasks()) ids.add(def.id());
         for (var id : ids){
             int done = countDailyForWeek(weekStart, id);
             int req = weeklyRequirement(id);
@@ -139,11 +124,17 @@ public class StateService {
             // week [lastProcessed .. lastProcessed+6] is complete
             LocalDate weekStart = lastProcessed;
             if (!weekStart.isBefore(firstFullWeekStart())){
-                int minutes = sumNutritionMinutesForWeek(weekStart);
-                if (minutes >= 900){ // 16*60
-                    addBalance(14);
-                } else {
-                    addBalance(-20);
+                var minutesTaskOpt = getState().getDailyTasks().stream()
+                        .filter(t -> t.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES && t.weeklyMinutesGoal() != null && t.weeklyMinutesGoal() > 0)
+                        .findFirst();
+                if (minutesTaskOpt.isPresent()){
+                    int minutes = sumWeeklyGoalMinutesForWeek(weekStart);
+                    int goal = minutesTaskOpt.get().weeklyMinutesGoal();
+                    if (minutes >= goal){
+                        addBalance(14);
+                    } else {
+                        addBalance(-20);
+                    }
                 }
                 applyWeeklyPenalties(weekStart);
             }
@@ -164,11 +155,26 @@ public class StateService {
         if (rs.getEffect() == RouletteEffect.DAILY_X2
                 && !today.equals(rs.getDate())
                 && !rs.isDailyPenaltyApplied()) {
-            var dailyDone = isDailyDone(rs.getDate(), rs.getDailyId());
-            if (!dailyDone) {
-                int pen = -Math.abs(rs.getDailyBaseReward());
+            String id = rs.getDailyId();
+            if (id == null) {
+                rs.setDailyPenaltyApplied(true);
+                save();
+                return;
+            }
+            if (id.startsWith("g:")) {
+                id = id.substring(2);
+                rs.setDailyId(id);
+            }
+            Integer base = rs.getDailyBaseReward();
+            if (base == null) {
+                base = dailyRewardById(id);
+                rs.setDailyBaseReward(base);
+            }
+            var dailyDone = isDailyDone(rs.getDate(), id);
+            if (!dailyDone && base != null && base != 0) {
+                int pen = -Math.abs(base);
                 addBalance(pen);
-                addHistory(today, "Штраф за пропуск: " + prettyDaily(rs.getDailyId()), pen);
+                addHistory(today, "Штраф за пропуск: " + prettyDaily(id), pen);
             }
             rs.setDailyPenaltyApplied(true);
             save();
@@ -176,21 +182,17 @@ public class StateService {
     }
 
     private boolean isDailyDone(LocalDate date, String dailyId){
-        var log = getState().getAnna().getDaily().get(date.toString());
         if (dailyId == null) return false;
-        switch (dailyId){
-            case "nutrition": return log != null && log.isNutritionDailyAwarded();
-            case "english": return log != null && log.isEnglishDailyAwarded();
-            case "sport": return log != null && log.isSportAwarded();
-            case "yoga": return log != null && log.isYogaAwarded();
-            case "viet": return log != null && log.isVietWordsAwarded();
-            default:
-                if (dailyId.startsWith("g:")){
-                    var set = getState().getAnna().getGenericDoneByDay()
-                            .getOrDefault(date.toString(), Collections.emptySet());
-                    return set.contains(dailyId.substring(2));
-                }
-                return false;
+        var log = getState().getAnna().getDaily().get(date.toString());
+        var opt = getState().getDailyTasks().stream().filter(d -> d.id().equals(dailyId)).findFirst();
+        if (opt.isEmpty()) return false;
+        var def = opt.get();
+        if (log == null) return false;
+        if (def.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES) {
+            Integer m = log.getMinutes().get(dailyId);
+            return m != null && def.minutesPerDay() != null && m >= def.minutesPerDay();
+        } else {
+            return log.getChecks().contains(dailyId);
         }
     }
 
@@ -232,25 +234,18 @@ public class StateService {
                 .add(new HistoryDTO.Item(label, points));
     }
 
+    public synchronized void addBalanceWithHistory(LocalDate date, String label, int delta){
+        addBalance(delta);
+        addHistory(date, label, delta);
+    }
+
     private String prettyDaily(String id){
         if (id == null) return "";
-        return switch (id) {
-            case "nutrition" -> "Нутрициология";
-            case "english" -> "Английский";
-            case "sport" -> "Спорт";
-            case "yoga" -> "Йога";
-            case "viet" -> "Вьетнамские слова";
-            default -> {
-                if (id.startsWith("g:")) {
-                    var gid = id.substring(2);
-                    var opt = getState().getGenericDaily().stream()
-                            .filter(g -> g.id().equals(gid))
-                            .findFirst();
-                    yield opt.map(GenericDailyTaskDef::title).orElse(gid);
-                }
-                yield id;
-            }
-        };
+        return getState().getDailyTasks().stream()
+                .filter(d -> d.id().equals(id))
+                .findFirst()
+                .map(com.buseiny.app.model.DailyTaskDef::title)
+                .orElse(id);
     }
 
     // --- Public API used by controllers ---
@@ -263,52 +258,75 @@ public class StateService {
 
         // aggregate week minutes
         int weekMinutes = 0;
-        for (int i=0;i<7;i++){
-            var d = weekStart.plusDays(i).toString();
-            var log = u.getDaily().get(d);
-            if (log != null) weekMinutes += log.getNutritionMinutes();
+        Integer weekGoalMinutes = null;
+        // take first minutes-type task with weekly goal
+        var minutesTaskOpt = getState().getDailyTasks().stream()
+                .filter(t -> t.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES && t.weeklyMinutesGoal() != null && t.weeklyMinutesGoal() > 0)
+                .findFirst();
+        if (minutesTaskOpt.isPresent()){
+            var minutesTask = minutesTaskOpt.get();
+            weekGoalMinutes = minutesTask.weeklyMinutesGoal();
+            for (int i=0;i<7;i++){
+                var d = weekStart.plusDays(i).toString();
+                var log = u.getDaily().get(d);
+                if (log != null) weekMinutes += log.getMinutes().getOrDefault(minutesTask.id(), 0);
+            }
         }
 
         var todayLog = u.getDaily().getOrDefault(today.toString(), new DailyLog());
 
         Map<String, Boolean> todayGenericDone = new HashMap<>();
-        var doneSet = u.getGenericDoneByDay().getOrDefault(today.toString(), new HashSet<>());
-        for (var def : getState().getGenericDaily()){
-            todayGenericDone.put(def.id(), doneSet.contains(def.id()));
-        }
 
-        Map<String, Integer> genericStreaks = new HashMap<>(u.getGenericStreaks());
+        Map<String, Integer> genericStreaks = new HashMap<>(u.getStreaks());
 
         Map<String,Object> map = new HashMap<>();
         map.put("username", u.getUsername());
         map.put("avatarUrl", u.getAvatarUrl());
         map.put("balance", u.getBalance());
-        map.put("todayNutritionMinutes", todayLog.getNutritionMinutes());
-        map.put("todayNutritionAwarded", todayLog.isNutritionDailyAwarded());
-        map.put("todayEnglishMinutes", todayLog.getEnglishMinutes());
-        map.put("todayEnglishAwarded", todayLog.isEnglishDailyAwarded());
-        map.put("todaySportDone", todayLog.isSportAwarded());
-        map.put("sportStreak", u.getSportStreak());
-        map.put("todayYogaDone", todayLog.isYogaAwarded());
-        map.put("todayVietDone", todayLog.isVietWordsAwarded());
-        map.put("vietStreak", u.getVietWordsStreak());
-        map.put("englishStreak", u.getEnglishStreak());
-        map.put("weekNutritionMinutes", weekMinutes);
-        map.put("weekGoalMinutes", 900);
+        map.put("weekMinutes", weekMinutes);
+        map.put("weekGoalMinutes", weekGoalMinutes == null ? 0 : weekGoalMinutes);
         map.put("secondsUntilWeekEndEpoch", weekEndInstant.getEpochSecond());
         map.put("currentWeekStart", weekStart.toString());
         map.put("goals", getState().getGoals());
-        map.put("shop", getState().getShop());
-        map.put("genericDaily", getState().getGenericDaily());
-        map.put("todayGenericDone", todayGenericDone);
-        map.put("genericStreaks", genericStreaks);
+        // shop with effectiveCost (considering today's roulette discounts)
+        List<Map<String,Object>> shopList = new ArrayList<>();
+        for (var s : getState().getShop()){
+            Map<String,Object> it = new HashMap<>();
+            it.put("id", s.id());
+            it.put("title", s.title());
+            it.put("cost", s.cost());
+            it.put("effectiveCost", effectiveCostToday(s.id(), s.cost()));
+            shopList.add(it);
+        }
+        map.put("shop", shopList);
+        // Unified tasks list with today's state
+        // Unified tasks list with today's state
+        List<Map<String,Object>> tasks = new ArrayList<>();
+        for (var def : getState().getDailyTasks()){
+            Map<String,Object> t = new HashMap<>();
+            t.put("id", def.id());
+            t.put("title", def.title());
+            t.put("kind", def.kind().name());
+            t.put("dailyReward", def.dailyReward());
+            t.put("minutesPerDay", def.minutesPerDay());
+            t.put("weeklyMinutesGoal", def.weeklyMinutesGoal());
+            t.put("streakEnabled", def.streakEnabled());
+            t.put("weeklyRequiredCount", def.weeklyRequiredCount());
+            int todayMinutes = todayLog.getMinutes().getOrDefault(def.id(), 0);
+            boolean todayDone = isDailyDone(today, def.id());
+            int streak = 0;
+            if (def.streakEnabled()){
+                streak = u.getStreaks().getOrDefault(def.id(), 0);
+            }
+            t.put("todayMinutes", todayMinutes);
+            t.put("todayDone", todayDone);
+            t.put("streak", streak);
+            tasks.add(t);
+        }
+        map.put("tasks", tasks);
         List<WeeklyTaskDTO> weekly = new ArrayList<>();
-        List.of("nutrition","english","sport","yoga","viet").forEach(id -> {
-            weekly.add(new WeeklyTaskDTO(id, prettyDaily(id), weeklyRequirement(id), countDailyForWeek(weekStart, id)));
-        });
-        for (var def : getState().getGenericDaily()){
-            String gid = "g:" + def.id();
-            weekly.add(new WeeklyTaskDTO(def.id(), def.title(), weeklyRequirement(gid), countDailyForWeek(weekStart, gid)));
+        for (var def : getState().getDailyTasks()){
+            weekly.add(new WeeklyTaskDTO(def.id(), def.title(), weeklyRequirement(def.id()), countDailyForWeek(weekStart, def.id())));
         }
         map.put("weekDaily", weekly);
         map.put("gifts", u.getGifts());
@@ -326,34 +344,19 @@ public class StateService {
 
         boolean changed = false;
 
-        if (yLog == null || !yLog.isSportAwarded()) {
-            if (u.getSportStreak() != 0) {
-                u.setSportStreak(0);
-                changed = true;
-            }
-        }
-        if (yLog == null || !yLog.isEnglishDailyAwarded()) {
-            if (u.getEnglishStreak() != 0) {
-                u.setEnglishStreak(0);
-                changed = true;
-            }
-        }
-        if (yLog == null || !yLog.isVietWordsAwarded()) {
-            if (u.getVietWordsStreak() != 0) {
-                u.setVietWordsStreak(0);
-                changed = true;
-            }
-        }
-
-        var doneSet = u.getGenericDoneByDay().getOrDefault(yesterday.toString(), Collections.emptySet());
-        var streaks = u.getGenericStreaks();
-        for (var def : getState().getGenericDaily()) {
-            if (def.streakEnabled() && !doneSet.contains(def.id())) {
-                if (streaks.getOrDefault(def.id(), 0) != 0) {
-                    streaks.put(def.id(), 0);
-                    changed = true;
+        var streaks = u.getStreaks();
+        for (var def : getState().getDailyTasks()) {
+            if (!def.streakEnabled()) continue;
+            boolean done = false;
+            if (yLog != null) {
+                if (def.kind() == DailyTaskKind.MINUTES) {
+                    Integer m = yLog.getMinutes().get(def.id());
+                    done = m != null && def.minutesPerDay() != null && m >= def.minutesPerDay();
+                } else {
+                    done = yLog.getChecks().contains(def.id());
                 }
             }
+            if (!done && streaks.getOrDefault(def.id(), 0) != 0) { streaks.put(def.id(), 0); changed = true; }
         }
 
         if (changed) {
@@ -418,7 +421,7 @@ public class StateService {
         while (it.hasNext()) {
             var g = it.next();
             if (g.id().equals(id)) {
-                addBalance(g.amount());
+                addBalanceWithHistory(LocalDate.now(zone()), "Подарок: " + g.title(), g.amount());
                 it.remove();
                 save();
                 return true;
@@ -438,22 +441,28 @@ public class StateService {
         save();
         return getState().getGoals();
     }
-    public synchronized List<GenericDailyTaskDef> setGenericDaily(List<GenericDailyTaskDef> items) throws IOException {
-        getState().setGenericDaily(new ArrayList<>(items));
-       save();
-        return getState().getGenericDaily();
+    public synchronized List<DailyTaskDef> setDailyTasks(List<DailyTaskDef> items) throws IOException {
+        getState().setDailyTasks(new ArrayList<>(items));
+        save();
+        return getState().getDailyTasks();
     }
 
     // ===== Admin: balance
     public synchronized int adminAddBalance(int delta) throws IOException {
         var u = getState().getAnna();
-        u.setBalance(Math.max(0, u.getBalance() + delta));
+        addBalanceWithHistory(LocalDate.now(zone()), "Админ: корректировка баланса", delta);
         save();
         return u.getBalance();
     }
     public synchronized int adminSetBalance(int value) throws IOException {
         var u = getState().getAnna();
-        u.setBalance(Math.max(0, value));
+        int old = u.getBalance();
+        int newValue = Math.max(0, value);
+        u.setBalance(newValue);
+        int delta = newValue - old;
+        if (delta != 0){
+            addHistory(LocalDate.now(zone()), "Админ: установка баланса", delta);
+        }
         save();
         return u.getBalance();
     }

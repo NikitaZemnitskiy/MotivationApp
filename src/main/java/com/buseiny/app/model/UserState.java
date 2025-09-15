@@ -14,15 +14,8 @@ public class UserState {
     // logs by date (yyyy-MM-dd)
     private Map<String, DailyLog> daily = new HashMap<>();
 
-    // streaks for fixed tasks
-    private int sportStreak;
-    private int englishStreak;
-    private int vietWordsStreak;
-
-    // streaks for admin generic tasks: id -> streak count
-    private Map<String, Integer> genericStreaks = new HashMap<>();
-    // records of generic tasks per date: yyyy-MM-dd -> set of ids
-    private Map<String, Set<String>> genericDoneByDay = new HashMap<>();
+    // streaks for tasks: taskId -> streak count
+    private Map<String, Integer> streaks = new HashMap<>();
 
     // extra history entries like roulette bonuses
     private Map<String, List<HistoryDTO.Item>> historyExtras = new HashMap<>();
