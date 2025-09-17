@@ -46,7 +46,7 @@ public class StateRepository {
     public synchronized void init() throws IOException {
         File f = new File(dataFile);
         if (!f.getParentFile().exists()) f.getParentFile().mkdirs();
-        if (f.exists()) {
+        if (f.exists() && f.length() > 0) {
             state = mapper.readValue(f, AppState.class);
         } else {
             state = freshState();

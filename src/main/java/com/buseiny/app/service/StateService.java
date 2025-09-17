@@ -248,18 +248,14 @@ public class StateService {
                 .orElse(id);
     }
 
-    // --- Public API used by controllers ---
     public synchronized Map<String,Object> status() throws IOException {
         processDayBoundariesIfNeeded();
         var u = getState().getAnna();
         var today = LocalDate.now(zone());
         var weekStart = TimeUtil.weekStartMonday(today);
         var weekEndInstant = TimeUtil.weekEndInstant(today, zone());
-
-        // aggregate week minutes
         int weekMinutes = 0;
         Integer weekGoalMinutes = null;
-        // take first minutes-type task with weekly goal
         var minutesTaskOpt = getState().getDailyTasks().stream()
                 .filter(t -> t.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES && t.weeklyMinutesGoal() != null && t.weeklyMinutesGoal() > 0)
                 .findFirst();

@@ -15,7 +15,6 @@ import java.util.function.Function;
 @Slf4j
 public class RouletteService {
     private final StateService state;
-    private record FixedDaily(String id, int reward, Function<DailyLog, Boolean> isDone) {}
 
     public RouletteService(StateService state) {
         this.state = state;
@@ -166,7 +165,4 @@ public class RouletteService {
                 .findFirst().map(ShopItem::title).orElse(id);
     }
 
-    private String genericTitle(String gid) {
-        return gid;
-    }
 }

@@ -1,5 +1,7 @@
 # Maven
 /target/
+/backups
+/pgdata
 
 # IntelliJ
 *.iml

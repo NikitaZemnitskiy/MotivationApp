@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: buseiny-postgres
+    environment:
+      - POSTGRES_DB=buseiny
+      - POSTGRES_USER=buseiny
+      - POSTGRES_PASSWORD=buseiny
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+      - ./backups:/backups:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U buseiny -d buseiny"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  app:
+    build: .
+    container_name: buseiny-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/buseiny
+      - SPRING_DATASOURCE_USERNAME=buseiny
+      - SPRING_DATASOURCE_PASSWORD=buseiny
+      - SERVER_PORT=8084
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./:/app
+    restart: unless-stopped
+  db-backup:
+    image: prodrigestivill/postgres-backup-local:16
+    container_name: buseiny-db-backup
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=buseiny
+      - POSTGRES_USER=buseiny
+      - POSTGRES_PASSWORD=buseiny
+      - SCHEDULE=0 0 * * *
+      - BACKUP_KEEP_DAYS=14
+      - BACKUP_KEEP_WEEKS=8
+      - BACKUP_KEEP_MONTHS=12
+      - TZ=Asia/Ho_Chi_Minh
+    volumes:
+      - ./backups:/backups
+    restart: unless-stopped
+
+
