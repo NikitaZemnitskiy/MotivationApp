@@ -102,24 +102,8 @@ public class HistoryService {
 
         LocalDate date = LocalDate.parse(dateStr);
         var u = state.getState().getAnna();
-        var daily = u.getDaily().get(dateStr);
 
         List<HistoryDTO.Item> items = new ArrayList<>();
-
-        if (daily != null) {
-            for (var def : state.getState().getDailyTasks()){
-                if (def.kind() == com.buseiny.app.model.DailyTaskKind.MINUTES){
-                    Integer m = daily.getMinutes().get(def.id());
-                    if (m != null && def.minutesPerDay() != null && m >= def.minutesPerDay()){
-                        items.add(new HistoryDTO.Item("Daily: " + def.title(), def.dailyReward()));
-                    }
-                } else {
-                    if (daily.getChecks().contains(def.id())){
-                        items.add(new HistoryDTO.Item("Daily: " + def.title(), def.dailyReward()));
-                    }
-                }
-            }
-        }
 
         var fixedBonuses = buildStreakBonusesFixed().getOrDefault(dateStr, List.of());
         items.addAll(fixedBonuses);

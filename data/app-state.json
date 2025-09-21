@@ -3,7 +3,7 @@
   "lastProcessedWeekStart" : "2025-09-15",
   "anna" : {
     "username" : "Анечка",
-    "balance" : 142,
+    "balance" : 138,
     "avatarUrl" : "/assets/avatar.png",
     "daily" : {
       "2025-08-27" : {
@@ -153,19 +153,50 @@
       "2025-09-14" : {
         "minutes" : {
           "nutrition" : 30,
+          "english" : 60
+        },
+        "checks" : [ "sport" ],
+        "minutesAwarded" : [ ]
+      },
+      "2025-09-15" : {
+        "minutes" : {
+          "nutrition" : 120,
           "english" : 0
         },
         "checks" : [ "sport" ],
+        "minutesAwarded" : [ ]
+      },
+      "2025-09-16" : {
+        "minutes" : {
+          "nutrition" : 195,
+          "english" : 0
+        },
+        "checks" : [ ],
+        "minutesAwarded" : [ ]
+      },
+      "2025-09-18" : {
+        "minutes" : {
+          "nutrition" : 120
+        },
+        "checks" : [ "jugging", "wake-at-8", "sport", "sleep-before-23" ],
+        "minutesAwarded" : [ ]
+      },
+      "2025-09-19" : {
+        "minutes" : {
+          "nutrition" : 120,
+          "english" : 15
+        },
+        "checks" : [ "jugging", "wake-at-8", "sport", "sleep-before-23" ],
         "minutesAwarded" : [ ]
       }
     },
     "streaks" : {
       "viet" : 0,
       "english" : 0,
-      "sport" : 0,
-      "sleep-before-23" : 20,
-      "wake-at-8" : 0,
-      "jugging" : 0
+      "sport" : 1,
+      "sleep-before-23" : 1,
+      "wake-at-8" : 1,
+      "jugging" : 1
     },
     "historyExtras" : {
       "2025-09-01" : [ {
@@ -219,14 +250,37 @@
       }, {
         "label" : "Админ: установка баланса",
         "points" : 11
+      } ],
+      "2025-09-18" : [ {
+        "label" : "Штраф за пропуск: Английский",
+        "points" : -1
+      }, {
+        "label" : "Рулетка эффект: SHOP_DISCOUNT_50 — День без гаджетов, только с любимкой",
+        "points" : 0
+      } ],
+      "2025-09-19" : [ {
+        "label" : "Рулетка эффект: DAILY_X2 — Горловой минет 15 минут",
+        "points" : 0
+      } ],
+      "2025-09-20" : [ {
+        "label" : "Штраф за пропуск: Горловой минет 15 минут",
+        "points" : -2
+      }, {
+        "label" : "Рулетка эффект: DAILY_X2 — Лечь спать до 23:00",
+        "points" : 0
       } ]
     },
-    "purchases" : [ ],
+    "purchases" : [ {
+      "shopItemId" : "coffee-out",
+      "titleSnapshot" : "Поход в кофейню или заказ кофе домой",
+      "costSnapshot" : 30,
+      "purchasedAt" : "2025-09-19T14:50:28.7663029"
+    } ],
     "gifts" : [ ],
     "todayRoulette" : {
-      "date" : "2025-09-15",
+      "date" : "2025-09-20",
       "effect" : "DAILY_X2",
-      "dailyId" : "english",
+      "dailyId" : "sleep-before-23",
       "dailyBaseReward" : 1,
       "dailyPenaltyApplied" : false,
       "goalId" : null,
