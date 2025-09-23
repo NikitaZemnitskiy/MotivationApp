@@ -1,26 +1,33 @@
 package com.buseiny.app.controller;
 
-import com.buseiny.app.dto.HistoryDTO;
+import com.buseiny.app.model.History;
+import com.buseiny.app.model.User;
+import com.buseiny.app.repository.UserRepository;
 import com.buseiny.app.service.HistoryService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import com.buseiny.app.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.IOException;
+import java.util.List;
 
-@RestController
-@RequestMapping("/api/history")
+@Controller
+@RequiredArgsConstructor
+@RequestMapping("/history")
 public class HistoryController {
-    private final HistoryService history;
-    public HistoryController(HistoryService history){ this.history = history; }
 
-    @GetMapping("/month")
-    public ResponseEntity<HistoryDTO.MonthHistory> month(
-            @RequestParam("year") int year,  @RequestParam("month") int month) throws IOException {
-        return ResponseEntity.ok(history.computeMonthHistory(year, month));
-    }
+    private final HistoryService historyService;
+    private final UserRepository userRepository;
 
-    @GetMapping("/day")
-    public ResponseEntity<HistoryDTO.DayHistory> day( @RequestParam("date") String date) throws IOException {
-        return ResponseEntity.ok(history.computeDayHistory(date));
+    @GetMapping("/{username}")
+    public String userHistory(@PathVariable String username, Model model) {
+        User user = userRepository.findByUsername(username).get();
+        List<History> historyList = historyService.getUserHistory(user);
+        model.addAttribute("user", user);
+        model.addAttribute("historyList", historyList);
+        return "history";
     }
 }

@@ -188,15 +188,20 @@
         },
         "checks" : [ "jugging", "wake-at-8", "sport", "sleep-before-23" ],
         "minutesAwarded" : [ ]
+      },
+      "2025-09-21" : {
+        "minutes" : { },
+        "checks" : [ "wake-at-8" ],
+        "minutesAwarded" : [ ]
       }
     },
     "streaks" : {
       "viet" : 0,
       "english" : 0,
-      "sport" : 1,
-      "sleep-before-23" : 1,
-      "wake-at-8" : 1,
-      "jugging" : 1
+      "sport" : 0,
+      "sleep-before-23" : 0,
+      "wake-at-8" : 0,
+      "jugging" : 0
     },
     "historyExtras" : {
       "2025-09-01" : [ {
@@ -268,6 +273,13 @@
       }, {
         "label" : "Рулетка эффект: DAILY_X2 — Лечь спать до 23:00",
         "points" : 0
+      } ],
+      "2025-09-21" : [ {
+        "label" : "Штраф за пропуск: Лечь спать до 23:00",
+        "points" : -1
+      }, {
+        "label" : "Рулетка эффект: DAILY_X2 — Нутрициология",
+        "points" : 0
       } ]
     },
     "purchases" : [ {
@@ -278,10 +290,10 @@
     } ],
     "gifts" : [ ],
     "todayRoulette" : {
-      "date" : "2025-09-20",
+      "date" : "2025-09-21",
       "effect" : "DAILY_X2",
-      "dailyId" : "sleep-before-23",
-      "dailyBaseReward" : 1,
+      "dailyId" : "nutrition",
+      "dailyBaseReward" : 2,
       "dailyPenaltyApplied" : false,
       "goalId" : null,
       "bonusPoints" : null,
