@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.springframework.scheduling.config.Task;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,6 +28,10 @@ public class History {
     private LocalDateTime timestamp = LocalDateTime.now(); // Когда произошло событие
     private boolean isDaily; // true если ежедневное задание, false если глобальное или другое
     private LocalDate date = LocalDate.now();
+
+    @ManyToOne
+    @JoinColumn(name = "task_id") // связь с таской
+    private DailyTask task;
 
     @Enumerated(EnumType.STRING)
     private HistoryType type;

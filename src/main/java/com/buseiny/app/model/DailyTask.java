@@ -2,6 +2,8 @@ package com.buseiny.app.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -40,6 +42,9 @@ public class DailyTask {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToMany(mappedBy = "task")
+    private List<History> histories;
 
     public DailyTask(){}
 }

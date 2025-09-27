@@ -5,5 +5,8 @@ public enum HistoryType {
     PENALTY,
     SHOP,
     WEEKLY_REWARD,
-    WEEKLY_PENALTY
+    WEEKLY_PENALTY,
+    DAILY_COMPLETE,
+    DAILY_PENALTY,
+    GLOBAL_COMPLETE,
 }

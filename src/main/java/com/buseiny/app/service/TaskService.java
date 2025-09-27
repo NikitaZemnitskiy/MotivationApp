@@ -2,6 +2,7 @@ package com.buseiny.app.service;
 
 import com.buseiny.app.model.DailyTask;
 import com.buseiny.app.model.GlobalTask;
+import com.buseiny.app.model.HistoryType;
 import com.buseiny.app.model.User;
 import com.buseiny.app.repository.DailyTaskRepository;
 import com.buseiny.app.repository.GlobalTaskRepository;
@@ -40,7 +41,7 @@ public class TaskService {
             setStreak(task);
             boolean isStreakEnabled = task.isStreakEnabled() && task.getCurrentStreak() >= 7;
             int reward = isStreakEnabled ? task.getDailyReward() * task.getStreakMultiplied() : task.getDailyReward();
-            historyService.addHistory(user, reward,task.getTitle() + (isStreakEnabled?"со стриком":""), true);
+            historyService.addHistory(user, reward,task.getTitle() + (isStreakEnabled?"со стриком":""), true, HistoryType.DAILY_COMPLETE);
             task.setLastCompletedDate(today);
             user.setBalance(user.getBalance() + reward);
         }
@@ -61,7 +62,7 @@ public class TaskService {
 
         if (!task.isCompleted()) {
             task.setCompleted(true);
-            historyService.addHistory(user, task.getReward(),task.getTitle(), false);
+            historyService.addHistory(user, task.getReward(),task.getTitle(), false, HistoryType.GLOBAL_COMPLETE);
             user.setBalance(user.getBalance() + task.getReward());
             globalTaskRepository.save(task);
             userRepository.save(user);

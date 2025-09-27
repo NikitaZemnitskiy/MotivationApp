@@ -52,8 +52,8 @@
                       th:text="${#temporals.format(entry.timestamp, 'dd.MM.yyyy HH:mm')}">Date</span>
             </div>
             <div>
-                <span th:class="${entry.amount > 0} ? 'text-green-600 font-bold' : 'text-red-600 font-bold'"
-                      th:text="${entry.amount > 0 ? '+' + entry.amount : entry.amount}">+0</span>
+                <span th:class="${entry.amount > -1} ? 'text-green-600 font-bold' : 'text-red-600 font-bold'"
+                      th:text="${entry.amount > -1 ? '+' + entry.amount : entry.amount}">+0</span>
                 <span th:if="${entry.isDaily}" class="ml-2 text-xs text-blue-600">Ежедневное</span>
             </div>
         </div>

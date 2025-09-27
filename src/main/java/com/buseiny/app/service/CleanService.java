@@ -36,7 +36,6 @@ public class CleanService {
         for (DailyTask task : tasks) {
             User user = task.getUser();
 
-            // проверяем, было ли выполнение вчера
             boolean missedYesterday = task.getLastCompletedDate() == null
                     || (!task.getLastCompletedDate().isEqual(yesterday) && !task.getLastCompletedDate().isEqual(today));
 
@@ -59,7 +58,13 @@ public class CleanService {
             }
 
             if (task.getLastCompletedDate() == null || !task.getLastCompletedDate().isEqual(today)) {
+                System.out.println("Очистка дня выполнения для " + task.getTitle());
                 task.setCurrentDoneToday(0);
+            }
+
+            if(missedYesterday){
+                System.out.println("Очистка стрика для " + task.getTitle());
+                task.setCurrentStreak(0);
             }
         }
 
