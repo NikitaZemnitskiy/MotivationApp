@@ -2,6 +2,8 @@ package com.buseiny.app.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -15,6 +17,7 @@ public class User {
     private String username;
     private String displayName;
     private int balance = 0;
+    private LocalDate lastWeaklyClean;
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -22,4 +25,8 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<GlobalTask> globalTasks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ShopItem> shopItems = new ArrayList<>();
+
 }

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
+    <h1 class="text-2xl font-bold mb-4">🎁 Shop</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div th:each="item : ${items}" class="border rounded-xl p-4 shadow hover:shadow-lg transition">
+            <h2 class="text-lg font-semibold" th:text="${item.name}">Item Name</h2>
+            <p class="text-sm text-gray-600 mb-2" th:text="${item.description}">Description</p>
+            <p class="font-bold text-pink-600 mb-2">💎 <span th:text="${item.price}">100</span></p>
+
+            <form th:action="@{'/shop/buy/' + ${item.id}}" method="post">
+                <input type="hidden" name="userId" value="1"/> <!-- потом подставим реального пользователя -->
+                <button type="submit"
+                        class="w-full bg-pink-500 text-white rounded-lg px-4 py-2 hover:bg-pink-600 transition">
+                    Купить
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

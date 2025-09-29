@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -79,11 +80,13 @@ public class CleanService {
 
         // Запускаем только если понедельник
         if (!today.getDayOfWeek().equals(DayOfWeek.MONDAY)) {
-            System.out.println("Джоба решила запуститься");
             return;
         }
 
-        List<DailyTask> tasks = taskRepository.findAll();
+
+
+        List<DailyTask> tasks = userRepository.findAll().stream().filter(u ->u.getLastWeaklyClean() == null || !today.isEqual(u.getLastWeaklyClean())).map(User::getDailyTasks).flatMap(java.util.Collection::stream).toList();
+
 
         for (DailyTask task : tasks) {
             User user = task.getUser();
@@ -129,11 +132,11 @@ public class CleanService {
 
                 // обнуляем недельный прогресс
                 task.setCurrentDoneOnThisWeek(0);
+                user.setLastWeaklyClean(today);
+                userRepository.save(user);
+                taskRepository.save(task);
             }
         }
-
-        userRepository.saveAll(userRepository.findAll());
-        taskRepository.saveAll(tasks);
     }
 
 
@@ -147,6 +150,7 @@ public class CleanService {
     @EventListener(ApplicationReadyEvent.class)
     public void resetOnStartup() {
         resetDailyProgress();
+        processWeeklyTasks();
     }
 
     @Scheduled(cron = "0 0 0 * * MON")

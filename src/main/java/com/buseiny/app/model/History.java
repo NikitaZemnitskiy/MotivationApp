@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.ToString;
 import org.springframework.scheduling.config.Task;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "history")
 @Data
+@ToString(exclude = {"user"})
 public class History {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

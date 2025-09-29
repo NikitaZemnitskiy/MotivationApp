@@ -31,7 +31,7 @@ public class TaskService {
         LocalDate today = LocalDate.now();
 
         //Check is task checked And already done today
-        if (task.getLastCompletedDate() != null && task.getLastCompletedDate().equals(today)) {
+        if (task.getLastCompletedDate() != null && task.getLastCompletedDate().equals(today) && task.isChecked()) {
             return;
         }
 
