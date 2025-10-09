@@ -7,6 +7,7 @@ import com.buseiny.app.model.User;
 import com.buseiny.app.repository.DailyTaskRepository;
 import com.buseiny.app.repository.GlobalTaskRepository;
 import com.buseiny.app.repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class TaskService {
             setStreak(task);
             boolean isStreakEnabled = task.isStreakEnabled() && task.getCurrentStreak() >= 7;
             int reward = isStreakEnabled ? task.getDailyReward() * task.getStreakMultiplied() : task.getDailyReward();
-            historyService.addHistory(user, reward,task.getTitle() + (isStreakEnabled?"со стриком":""), true, HistoryType.DAILY_COMPLETE);
+            historyService.addHistory(user, reward,task.getTitle() + (isStreakEnabled?" со стриком":""), true, HistoryType.DAILY_COMPLETE);
             task.setLastCompletedDate(today);
             user.setBalance(user.getBalance() + reward);
         }

@@ -7,34 +7,7 @@
 </head>
 <body class="bg-gray-100">
 
-<header class="bg-white shadow p-4">
-    <div class="flex justify-between items-center">
-        <!-- Имя -->
-        <h1 class="text-2xl font-bold text-purple-700" th:text="${user.displayName}">Name</h1>
-
-        <!-- Навигация -->
-        <nav class="flex space-x-6">
-            <a th:href="@{/{username}(username=${user.username})}"
-               class="text-purple-700 font-semibold hover:text-yellow-500 transition">
-                🎯 Задания
-            </a>
-            <a th:href="@{/history/{username}(username=${user.username})}"
-               class="text-purple-700 font-semibold hover:text-yellow-500 transition">
-                📜 История
-            </a>
-            <a th:href="@{/roulette}"
-               class="text-purple-700 font-semibold hover:text-yellow-500 transition">
-                🎰 Рулетка
-            </a>
-        </nav>
-
-        <!-- Баланс -->
-        <span class="text-lg font-semibold text-gray-700">
-            Баланс:
-            <span class="text-green-600" th:text="${user.balance}">0</span> Бусёинов
-        </span>
-    </div>
-</header>
+<div th:replace="fragments/header :: headerFragment"></div>
 
 <main class="p-6 max-w-4xl mx-auto">
 

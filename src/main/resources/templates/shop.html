@@ -8,35 +8,7 @@
 </head>
 <body class="bg-gray-100 p-6">
 
-<!-- Header -->
-<header class="bg-white shadow p-4 mb-6">
-    <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-purple-700" th:text="${user.displayName}">Имя</h1>
-
-        <nav class="flex space-x-6">
-            <a th:href="@{/{username}(username=${user.username})}"
-               class="text-purple-700 font-semibold hover:text-yellow-500 transition">
-                🎯 Задания
-            </a>
-            <a th:href="@{/history/{username}(username=${user.username})}"
-               class="text-purple-700 font-semibold hover:text-yellow-500 transition">
-                📜 История
-            </a>
-            <a th:href="@{/shop/{username}(username=${user.username})}"
-               class="text-purple-700 font-semibold hover:text-yellow-500 transition">
-                🏪 Магазин
-            </a>
-            <a th:href="@{/roulette}"
-               class="text-purple-700 font-semibold hover:text-yellow-500 transition">
-                🎰 Рулетка
-            </a>
-        </nav>
-
-        <span class="text-lg font-semibold text-gray-700">
-            Баланс: <span class="text-green-600" th:text="${user.balance}">0</span> бусёинов
-        </span>
-    </div>
-</header>
+<div th:replace="fragments/header :: headerFragment"></div>
 
 <!-- Shop -->
 <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6 relative">

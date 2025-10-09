@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   db:
     image: postgres:15
@@ -12,6 +13,18 @@ services:
       - buseiny_pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  app:
+    build: .
+    container_name: buseiny-app
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/buseiny
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    ports:
+      - "8080:8080"
 
 volumes:
   buseiny_pgdata:
