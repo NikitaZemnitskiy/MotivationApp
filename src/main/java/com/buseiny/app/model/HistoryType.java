@@ -9,4 +9,6 @@ public enum HistoryType {
     DAILY_COMPLETE,
     DAILY_PENALTY,
     GLOBAL_COMPLETE,
+    PREDICTION_PAY,
+    PREDICTION_WIN
 }

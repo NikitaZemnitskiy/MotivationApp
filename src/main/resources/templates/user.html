@@ -4,23 +4,25 @@
     <meta charset="UTF-8">
     <title th:text="${user.displayName}">User Page</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @keyframes glow-bar {
+            0% { box-shadow: 0 0 8px #22c55e, inset 0 0 4px #22c55e; }
+            50% { box-shadow: 0 0 20px #16a34a, inset 0 0 10px #16a34a; }
+            100% { box-shadow: 0 0 8px #22c55e, inset 0 0 4px #22c55e; }
+        }
+
+        .animate-bar-glow {
+            animation: glow-bar 1.8s infinite ease-in-out;
+        }
+    </style>
 </head>
+
 <body class="bg-gradient-to-r from-pink-100 to-purple-200 min-h-screen flex flex-col">
 
 <div th:replace="fragments/header :: headerFragment"></div>
 
 <main class="flex-1 p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-    <style>
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px #22c55e, 0 0 10px #22c55e; }
-            50% { box-shadow: 0 0 20px #22c55e, 0 0 40px #16a34a; }
-            100% { box-shadow: 0 0 5px #22c55e, 0 0 10px #22c55e; }
-        }
-
-        .animate-pulse-glow {
-            animation: glow 1.5s infinite;
-        }
-    </style>
 
     <!-- Ежедневные задания -->
     <section class="bg-white rounded-xl shadow p-4">
@@ -53,17 +55,14 @@
             <!-- Статистика по заданию -->
             <div class="text-sm text-gray-700 mt-1 space-y-1">
 
-                <!-- Сегодня -->
                 <p th:if="${task.countGoal > 0 or task.minutesGoal > 0}">
                     Сегодня: <span th:text="${task.currentDoneToday}">0</span>
                 </p>
 
-                <!-- Стрик -->
                 <p th:if="${task.streakEnabled}">
                     🔥 Стрик: <span th:text="${task.currentStreak}">0</span>
                 </p>
 
-                <!-- Награда -->
                 <p th:if="${task.dailyReward != 0}">
                     Награда:
                     <span class="text-green-600 font-semibold"
@@ -72,7 +71,6 @@
                     </span> Бусёинов
                 </p>
 
-                <!-- Штраф -->
                 <p th:if="${task.dailyPenalty != 0}">
                     Штраф:
                     <span class="text-red-600 font-semibold" th:text="${task.dailyPenalty}">0</span> Бусёинов
@@ -81,7 +79,6 @@
 
             <!-- Кнопки -->
             <div class="mt-2 space-x-2 flex flex-wrap">
-                <!-- MinutesGoal -->
                 <form th:if="${task.minutesGoal > 0}" method="post"
                       th:action="@{'/tasks/daily/complete/' + ${task.id} + '/15'}">
                     <input type="hidden" name="username" th:value="${user.username}"/>
@@ -109,7 +106,6 @@
                     </button>
                 </form>
 
-                <!-- CountGoal -->
                 <form th:if="${task.countGoal > 0}" method="post"
                       th:action="@{'/tasks/daily/complete/' + ${task.id} + '/1'}">
                     <input type="hidden" name="username" th:value="${user.username}"/>
@@ -118,7 +114,6 @@
                     </button>
                 </form>
 
-                <!-- Простое задание -->
                 <form th:if="${task.countGoal == 0 and task.minutesGoal == 0}" method="post"
                       th:action="@{'/tasks/daily/complete/' + ${task.id} + '/1'}">
                     <input type="hidden" name="username" th:value="${user.username}"/>
@@ -159,13 +154,11 @@
             <span id="week-timer" class="font-semibold text-red-600">--:--:--</span>
         </div>
 
-        <!-- Новый блок -->
         <div class="mb-6 text-gray-700 font-semibold">
             Предварительный итог недели:
             <span id="weekly-summary" class="text-green-600">0</span> Бусёинов
         </div>
 
-        <!-- Недельные задания -->
         <div th:each="task : ${user.dailyTasks}" th:if="${task.hasWeeklyNorm}"
              class="mb-6 relative weekly-task"
              th:data-reward="${task.weaklyReward}"
@@ -177,24 +170,21 @@
                 <span th:if="${task.currentDoneOnThisWeek >= task.weeklyNorm}" class="text-green-600 text-lg">✅</span>
             </h3>
 
-            <!-- Прогресс бар -->
+            <!-- Только полоска пульсирует -->
             <div class="w-full bg-gray-200 rounded h-3 mt-1 relative overflow-hidden">
-                <div th:classappend="${task.currentDoneOnThisWeek >= task.weeklyNorm} ? ' animate-pulse-glow' : ''"
-                     class="bg-green-500 h-3 rounded transition-all duration-500"
+                <div class="bg-green-500 h-3 rounded transition-all duration-500"
+                     th:classappend="${task.currentDoneOnThisWeek >= task.weeklyNorm} ? ' animate-bar-glow' : ''"
                      th:style="'width:' + (${task.currentDoneOnThisWeek} >= ${task.weeklyNorm} ? 100 : (${task.currentDoneOnThisWeek} * 100 / ${task.weeklyNorm})) + '%'">
                 </div>
             </div>
 
-            <!-- Цифры и награды/штрафы -->
             <div class="mt-1 text-xs text-gray-700 text-right space-y-1">
                 <div>
                     <span th:text="${task.currentDoneOnThisWeek}">0</span>/<span th:text="${task.weeklyNorm}">0</span>
                 </div>
-                <!-- Награда -->
                 <div th:if="${task.weaklyReward != 0}" class="text-green-600 font-semibold">
                     Награда за неделю: <span th:text="${task.weaklyReward}">0</span> Бусёинов
                 </div>
-                <!-- Штраф (убирается, если выполнено) -->
                 <div th:if="${task.weaklyPenalty != 0 and task.currentDoneOnThisWeek < task.weeklyNorm}"
                      class="text-red-600 font-semibold">
                     Штраф за неделю: <span th:text="${task.weaklyPenalty}">0</span> Бусёинов
@@ -226,7 +216,6 @@
             `${daysPart}${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
     }
 
-    // Подсчёт предварительного итога
     function updateWeeklySummary() {
         let total = 0;
         document.querySelectorAll(".weekly-task").forEach(task => {

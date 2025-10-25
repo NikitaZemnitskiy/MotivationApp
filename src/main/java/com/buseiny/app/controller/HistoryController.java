@@ -4,7 +4,6 @@ import com.buseiny.app.model.History;
 import com.buseiny.app.model.User;
 import com.buseiny.app.repository.UserRepository;
 import com.buseiny.app.service.HistoryService;
-import com.buseiny.app.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

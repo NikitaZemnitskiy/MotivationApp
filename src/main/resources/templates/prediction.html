@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔮 Предсказания — Бусёины</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+<!-- ✅ Подключаем общий хедер -->
+<div th:replace="fragments/header :: headerFragment"></div>
+
+<!-- === Контент страницы === -->
+<main class="flex flex-col items-center flex-1 p-6">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-6 mt-4">
+        🔮 Предсказания на биткоин
+    </h1>
+
+    <div class="bg-gray-800 p-6 rounded-2xl w-full max-w-md text-center shadow-2xl border border-gray-700">
+        <p class="text-gray-400 mb-2">Текущий курс BTC/USD:</p>
+        <p id="btc-price" class="text-4xl font-bold text-green-400 mb-4">—</p>
+
+        <!-- === Блок для размещения ставки === -->
+        <div id="bet-block">
+            <label class="block mb-2 text-gray-300">Ставка (1–10 бусёинов):</label>
+            <input id="bet-amount" type="number" min="1" max="10"
+                   class="w-24 text-center rounded-lg bg-gray-700 text-white p-2 mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-400">
+
+            <div class="flex justify-center gap-4 mb-4">
+                <button id="btn-up" class="bg-green-600 hover:bg-green-700 px-5 py-2 rounded-xl font-semibold transition">
+                    📈 Вырастет
+                </button>
+                <button id="btn-down" class="bg-red-600 hover:bg-red-700 px-5 py-2 rounded-xl font-semibold transition">
+                    📉 Упадёт
+                </button>
+            </div>
+        </div>
+
+        <!-- === Блок текущей ставки === -->
+        <div id="current-prediction" class="hidden mt-4 p-4 rounded-xl bg-gray-700 border border-gray-600 text-left">
+            <h3 class="text-yellow-400 mb-3 text-xl font-semibold text-center">Текущая ставка</h3>
+            <p><span id="prediction-direction" class="font-bold"></span></p>
+            <p>Начальная цена: <span id="prediction-start"></span> $</p>
+            <p>Текущая цена: <span id="prediction-current"></span> $</p>
+            <p>Изменение: <span id="prediction-change"></span></p>
+            <p id="prediction-timer" class="mt-3 text-gray-300 text-center font-medium"></p>
+        </div>
+
+        <p id="message" class="text-lg text-gray-300 mt-3 h-6"></p>
+
+        <button id="btn-result" class="mt-6 bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-xl font-semibold transition">
+            Проверить результат
+        </button>
+    </div>
+</main>
+
+<!-- === JS === -->
+<script>
+    const username = window.location.pathname.split("/")[2];
+    const baseUrl = `/api/users/${username}/prediction`;
+    let btcPrice = 0;
+    let activePrediction = null;
+
+    // === Получение цены BTC ===
+    async function fetchBTC() {
+        const res = await fetch(`${baseUrl}/btc`);
+        btcPrice = await res.json();
+        document.getElementById("btc-price").textContent = btcPrice.toFixed(2) + " $";
+        updatePredictionUI();
+    }
+
+    // === Сделать ставку ===
+    async function placePrediction(direction) {
+        const amount = parseInt(document.getElementById("bet-amount").value);
+        if (!amount || amount < 1 || amount > 10) {
+            alert("Введите ставку от 1 до 10 бусёинов");
+            return;
+        }
+
+        const res = await fetch(`${baseUrl}/place`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ direction, amount })
+        });
+
+        document.getElementById("message").textContent = await res.text();
+        await loadCurrentPrediction();
+    }
+
+    // === Проверить результат ===
+    async function checkResult() {
+        const res = await fetch(`${baseUrl}/result`);
+        const data = await res.json();
+        document.getElementById("message").textContent =
+            `${data.message} ${data.won ? `(+${data.reward} бусёинов)` : ""}`;
+        if (data.won) confetti();
+        await loadCurrentPrediction();
+    }
+
+    // === Загрузить текущую ставку ===
+    async function loadCurrentPrediction() {
+        const res = await fetch(`${baseUrl}/current`);
+        if (res.status === 404) {
+            activePrediction = null;
+            updatePredictionUI();
+            return;
+        }
+        activePrediction = await res.json();
+        updatePredictionUI();
+    }
+
+    // === Обновить UI ===
+    function updatePredictionUI() {
+        const betBlock = document.getElementById("bet-block");
+        const currentBlock = document.getElementById("current-prediction");
+
+        if (!activePrediction) {
+            currentBlock.classList.add("hidden");
+            betBlock.classList.remove("hidden");
+            return;
+        }
+
+        betBlock.classList.add("hidden");
+        currentBlock.classList.remove("hidden");
+
+        document.getElementById("prediction-direction").textContent =
+            activePrediction.direction === "up" ? "📈 Рост" : "📉 Падение";
+
+        document.getElementById("prediction-start").textContent =
+            activePrediction.startPrice.toFixed(2);
+
+        document.getElementById("prediction-current").textContent =
+            btcPrice.toFixed(2);
+
+        const diff = btcPrice - activePrediction.startPrice;
+        const diffText = diff.toFixed(2) + " $";
+
+        const color = (activePrediction.direction === "up")
+            ? (diff >= 0 ? "text-green-400" : "text-red-400")
+            : (diff >= 0 ? "text-red-400" : "text-green-400");
+
+        const changeEl = document.getElementById("prediction-change");
+        changeEl.textContent = diff >= 0 ? "+" + diffText : diffText;
+        changeEl.className = color + " font-bold";
+
+        updateTimer();
+    }
+
+    // === Таймер до 23:00 ===
+    function updateTimer() {
+        const timerEl = document.getElementById("prediction-timer");
+        if (!activePrediction) return;
+
+        const now = new Date();
+        const end = new Date();
+        end.setHours(19, 0, 0, 0);
+
+        const diff = end - now;
+        if (diff <= 0) {
+            timerEl.textContent = "⏰ Время ставки истекло — проверь результат!";
+            return;
+        }
+
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        timerEl.textContent = `До завершения: ${h}ч ${m}м ${s}с`;
+    }
+
+    // === Салют при выигрыше ===
+    function confetti() {
+        const el = document.createElement("div");
+        el.textContent = "🎆";
+        el.className = "absolute text-6xl animate-bounce";
+        el.style.left = Math.random() * 80 + "%";
+        el.style.top = "50%";
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2000);
+    }
+
+    document.getElementById("btn-up").addEventListener("click", () => placePrediction("up"));
+    document.getElementById("btn-down").addEventListener("click", () => placePrediction("down"));
+    document.getElementById("btn-result").addEventListener("click", checkResult);
+
+    // Интервалы обновления
+    setInterval(() => {
+        fetchBTC();
+        updateTimer();
+    }, 1000);
+
+    fetchBTC();
+    loadCurrentPrediction();
+</script>
+</body>
+</html>

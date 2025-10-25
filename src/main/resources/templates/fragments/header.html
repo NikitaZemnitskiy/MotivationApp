@@ -29,12 +29,16 @@
                    class="nav-link text-purple-700 font-semibold hover:text-yellow-500 transition">
                     🎰 Рулетка
                 </a>
+                <a th:href="@{/prediction/{username}(username=${user.username})}"
+                   class="nav-link text-purple-700 font-semibold hover:text-yellow-500 transition">
+                    🔮 Предсказания
+                </a>
             </nav>
 
             <!-- Баланс -->
             <span class="text-lg font-semibold text-gray-700">
-            Баланс: <span class="text-green-600" th:text="${user.balance}">0</span> Бусёинов
-        </span>
+                Баланс: <span class="text-green-600" th:text="${user.balance}">0</span> Бусёинов
+            </span>
         </div>
     </header>
 
